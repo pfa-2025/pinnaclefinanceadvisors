@@ -1,5 +1,6 @@
 import { buildMetadata } from "@/lib/metadata";
 
+import { contactDetails, socialLinks } from "@/constants/contact";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ContactForm } from "@/components/website/contact-form";
 import { PageHero } from "@/components/website/page-hero";
@@ -26,9 +27,33 @@ export default function ContactPage() {
               description="Whether you are planning for retirement, managing growing complexity, or preparing for a major transition, we’re ready to help."
             />
             <div className="mt-8 space-y-4 text-sm leading-7 text-muted">
-              <p>220 Davidson Avenue, Somerset, NJ</p>
-              <p>(908) 555-0100</p>
-              <p>hello@pinnaclefinanceadvisors.com</p>
+              <p>{contactDetails.address}</p>
+              <p>{contactDetails.phone}</p>
+              <p>{contactDetails.email}</p>
+              <a
+                href={contactDetails.calendlyUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex text-primary transition hover:text-accent"
+              >
+                Schedule directly on Calendly
+              </a>
+            </div>
+            <div className="mt-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">Follow Us</p>
+              <div className="mt-4 flex flex-wrap gap-3 text-sm">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-line bg-white px-4 py-2 text-primary transition hover:bg-[#f4f8f8]"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
           <ContactForm />

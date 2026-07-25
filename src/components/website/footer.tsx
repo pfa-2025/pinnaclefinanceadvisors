@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { contactDetails, socialLinks } from "@/constants/contact";
 import { websiteNavigation } from "@/constants/navigation";
 import { services } from "@/data/site";
 
@@ -48,9 +49,33 @@ export function Footer() {
         <div>
           <h3 className="font-display text-lg">Contact</h3>
           <div className="mt-5 space-y-3 text-sm leading-7 text-white/68">
-            <p>220 Davidson Avenue, Somerset, NJ</p>
-            <p>(908) 555-0100</p>
-            <p>hello@pinnaclefinanceadvisors.com</p>
+            <p>{contactDetails.address}</p>
+            <p>{contactDetails.phone}</p>
+            <p>{contactDetails.email}</p>
+            <a
+              href={contactDetails.calendlyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block hover:text-white"
+            >
+              Book on Calendly
+            </a>
+            <div className="pt-2">
+              <p className="text-xs uppercase tracking-[0.22em] text-white/45">Social</p>
+              <div className="mt-2 space-y-2">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block hover:text-white"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
             <p className="pt-3 text-xs text-white/50">
               Pinnacle Finance Advisors provides educational information and planning guidance. Investment and insurance products are subject to applicable risks and regulations.
             </p>

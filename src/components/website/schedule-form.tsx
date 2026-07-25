@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import type { ReactNode } from "react";
 import { z } from "zod";
 
+import { contactDetails } from "@/constants/contact";
 import { postJson } from "@/lib/api";
 
 const scheduleSchema = z.object({
@@ -89,6 +90,18 @@ export function ScheduleForm() {
           Your request has been queued for confirmation.
         </p>
       ) : null}
+      <p className="mt-4 text-xs leading-6 text-muted">
+        If you prefer immediate scheduling, you can also{" "}
+        <a
+          href={contactDetails.calendlyUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-primary transition hover:text-accent"
+        >
+          book directly on Calendly
+        </a>
+        .
+      </p>
     </form>
   );
 }
