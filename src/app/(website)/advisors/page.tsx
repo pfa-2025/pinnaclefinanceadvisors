@@ -1,5 +1,6 @@
 import { advisors } from "@/data/site";
 import { buildMetadata } from "@/lib/metadata";
+import { cn } from "@/lib/utils";
 
 import { SectionHeading } from "@/components/shared/section-heading";
 import { AdvisorCard } from "@/components/website/advisor-card";
@@ -25,7 +26,12 @@ export default function AdvisorsPage() {
             title="A boutique team built for thoughtful, human-centered planning."
             description="We combine financial rigor with the kind of ongoing communication that makes important decisions feel clearer."
           />
-          <div className="mt-12 grid gap-8 lg:grid-cols-3">
+          <div
+            className={cn(
+              "mt-12 grid gap-8",
+              advisors.length === 1 ? "mx-auto max-w-[34rem]" : "lg:grid-cols-3",
+            )}
+          >
             {advisors.map((advisor) => (
               <AdvisorCard key={advisor.slug} advisor={advisor} />
             ))}

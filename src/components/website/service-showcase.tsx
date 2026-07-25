@@ -46,7 +46,7 @@ export function ServiceShowcase({ services }: { services: Service[] }) {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.35 }}
           >
-            <div className="relative h-[320px] overflow-hidden rounded-4xl">
+            <div className="relative h-[240px] overflow-hidden rounded-4xl sm:h-[320px]">
               <Image src={active.image} alt={active.title} fill className="object-cover" />
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -64,7 +64,7 @@ export function ServiceShowcase({ services }: { services: Service[] }) {
               </Link>
             </div>
             <p className="mt-5 max-w-2xl text-base leading-8 text-white/72">{active.description}</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {active.benefits.map((benefit) => (
                 <div key={benefit} className="rounded-3xl border border-white/8 bg-white/[0.03] p-4 text-sm text-white/74">
                   {benefit}

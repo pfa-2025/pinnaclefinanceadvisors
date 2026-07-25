@@ -8,9 +8,9 @@ import { FadeUp, ImageReveal } from "@/components/animations/motion";
 export function AdvisorCard({ advisor }: { advisor: Advisor }) {
   return (
     <FadeUp>
-      <Link href={`/advisors/${advisor.slug}`} className="group block">
+      <Link href={`/advisors/${advisor.slug}`} className="group block w-full">
         <ImageReveal className="rounded-5xl">
-          <div className="relative h-[420px] overflow-hidden rounded-5xl">
+          <div className="relative h-[320px] overflow-hidden rounded-5xl sm:h-[420px]">
             <Image
               src={advisor.image}
               alt={advisor.name}
@@ -19,7 +19,7 @@ export function AdvisorCard({ advisor }: { advisor: Advisor }) {
             />
           </div>
         </ImageReveal>
-        <div className="mt-6 flex items-end justify-between gap-6">
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h3 className="font-display text-3xl tracking-[-0.05em] text-primary">
               {advisor.name}

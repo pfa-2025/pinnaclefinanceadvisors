@@ -38,7 +38,7 @@ export default function AboutPage() {
           </div>
           <div className="relative">
             <ImageReveal className="rounded-[2.8rem]">
-              <div className="relative h-[620px] overflow-hidden rounded-[2.8rem]">
+              <div className="relative h-[420px] overflow-hidden rounded-[2.8rem] sm:h-[620px]">
                 <Image
                   src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80"
                   alt="Advisory team conversation"

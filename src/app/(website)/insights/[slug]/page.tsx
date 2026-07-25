@@ -43,7 +43,7 @@ export default async function InsightDetailPage({
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell">
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[520px] overflow-hidden rounded-[2.8rem]">
+            <div className="relative h-[320px] overflow-hidden rounded-[2.8rem] sm:h-[520px]">
               <Image src={article.image} alt={article.title} fill className="object-cover" />
             </div>
           </ImageReveal>

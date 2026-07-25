@@ -71,37 +71,15 @@ export const services: Service[] = [
 
 export const advisors: Advisor[] = [
   {
-    slug: "amelia-grant",
-    name: "Amelia Grant",
-    role: "Founder & Senior Wealth Advisor",
-    bio: "Amelia leads with a calm strategic lens, helping founders, families, and executives align wealth with the life they are building.",
-    specializations: ["Long-term wealth strategy", "Executive planning", "Legacy conversations"],
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
-    email: "amelia@pinnaclefinanceadvisors.com",
-    phone: "(908) 555-0141",
-  },
-  {
-    slug: "noah-bennett",
-    name: "Noah Bennett",
+    slug: "ritul-sah",
+    name: "Ritul Sah",
     role: "Director of Investment Strategy",
-    bio: "Noah translates complex markets into practical decisions, building allocation strategies that remain disciplined through change.",
+    bio: "Ritul brings a disciplined, practical approach to financial planning, helping clients make confident long-term decisions with clarity and structure.",
     specializations: ["Portfolio construction", "Risk strategy", "Tax-aware investing"],
     image:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80",
-    email: "noah@pinnaclefinanceadvisors.com",
+    email: "ritul@pinnaclefinanceadvisors.com",
     phone: "(908) 555-0168",
-  },
-  {
-    slug: "sophia-lin",
-    name: "Sophia Lin",
-    role: "Family Planning Advisor",
-    bio: "Sophia helps clients coordinate estate, education, and life-stage planning with empathy and meticulous attention to detail.",
-    specializations: ["Family strategy", "Estate planning", "Education funding"],
-    image:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=900&q=80",
-    email: "sophia@pinnaclefinanceadvisors.com",
-    phone: "(908) 555-0129",
   },
 ];
 

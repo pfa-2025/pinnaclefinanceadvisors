@@ -16,7 +16,7 @@ export function InsightCard({
     <FadeUp className={featured ? "lg:row-span-2" : ""}>
       <Link href={`/insights/${insight.slug}`} className="group block">
         <ImageReveal className="rounded-5xl">
-          <div className={`relative overflow-hidden rounded-5xl ${featured ? "h-[420px]" : "h-[280px]"}`}>
+          <div className={`relative overflow-hidden rounded-5xl ${featured ? "h-[320px] sm:h-[420px]" : "h-[240px] sm:h-[280px]"}`}>
             <Image
               src={insight.image}
               alt={insight.title}
@@ -29,7 +29,7 @@ export function InsightCard({
           <p className="text-xs uppercase tracking-[0.28em] text-accent">
             {insight.category} • {insight.date}
           </p>
-          <h3 className={`mt-4 font-display tracking-[-0.05em] text-primary ${featured ? "text-3xl" : "text-2xl"}`}>
+          <h3 className={`mt-4 font-display tracking-[-0.05em] text-primary ${featured ? "text-2xl sm:text-3xl" : "text-2xl"}`}>
             {insight.title}
           </h3>
           <p className="mt-4 max-w-xl text-sm leading-7 text-muted">{insight.description}</p>

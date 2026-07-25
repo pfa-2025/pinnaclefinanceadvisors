@@ -115,7 +115,7 @@ export function Navbar() {
                       className={cn(
                         "flex items-center justify-between rounded-xl px-4 py-3 text-[0.98rem] font-medium transition",
                         pathname === item.href
-                          ? "border border-primary/10 bg-primary text-white"
+                          ? "border border-primary/10 bg-primary !text-white"
                           : "border border-line/80 bg-white text-primary hover:bg-[#f4f8f8]",
                       )}
                     >

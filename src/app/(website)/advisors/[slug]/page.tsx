@@ -44,7 +44,7 @@ export default async function AdvisorProfilePage({
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[620px] overflow-hidden rounded-[2.8rem]">
+            <div className="relative h-[420px] overflow-hidden rounded-[2.8rem] sm:h-[620px]">
               <Image src={advisor.image} alt={advisor.name} fill className="object-cover" />
             </div>
           </ImageReveal>

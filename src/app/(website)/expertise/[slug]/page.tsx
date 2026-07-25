@@ -54,7 +54,7 @@ export default async function ServiceDetailPage({
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {service.benefits.map((benefit) => (
                 <FadeUp key={benefit} className="rounded-4xl border border-line bg-white/70 p-5 shadow-soft">
                   <p className="text-sm font-medium text-primary">{benefit}</p>
@@ -66,7 +66,7 @@ export default async function ServiceDetailPage({
             </FadeUp>
           </div>
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[520px] overflow-hidden rounded-[2.8rem]">
+            <div className="relative h-[380px] overflow-hidden rounded-[2.8rem] sm:h-[520px]">
               <Image src={service.image} alt={service.title} fill className="object-cover" />
             </div>
           </ImageReveal>

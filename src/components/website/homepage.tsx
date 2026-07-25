@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { advisors, homepageStats, insights, services } from "@/data/site";
+import { cn } from "@/lib/utils";
 
 import {
   FadeIn,
@@ -79,7 +80,7 @@ function HeroSection() {
 
         <div className="relative">
           <ImageReveal className="ml-auto max-w-[560px] rounded-[2.5rem]">
-            <div className="relative h-[560px] overflow-hidden rounded-[2.5rem] border border-white/10">
+            <div className="relative h-[420px] overflow-hidden rounded-[2.5rem] border border-white/10 sm:h-[560px]">
               <Image
                 src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80"
                 alt="Pinnacle Finance advisors in discussion"
@@ -90,7 +91,7 @@ function HeroSection() {
             </div>
           </ImageReveal>
 
-          <ScaleReveal className="glass-panel absolute -left-2 top-6 w-52 rounded-[1.9rem] p-5 shadow-premium lg:-left-16">
+          <ScaleReveal className="glass-panel absolute -left-1 top-4 w-40 rounded-[1.9rem] p-4 shadow-premium sm:-left-2 sm:top-6 sm:w-52 sm:p-5 lg:-left-16">
             <p className="text-[0.72rem] uppercase tracking-[0.24em] text-primary/72">PORTFOLIO OUTLOOK</p>
             <div className="mt-4 flex items-end justify-between">
               <div>
@@ -103,7 +104,7 @@ function HeroSection() {
             </div>
           </ScaleReveal>
 
-          <ScaleReveal className="absolute -bottom-8 right-3 w-[250px] rounded-[1.9rem] border border-white/10 bg-white/12 p-5 backdrop-blur-xl lg:right-[-1.5rem]">
+          <ScaleReveal className="absolute -bottom-6 right-0 w-[210px] rounded-[1.9rem] border border-white/10 bg-white/12 p-4 backdrop-blur-xl sm:-bottom-8 sm:right-3 sm:w-[250px] sm:p-5 lg:right-[-1.5rem]">
             <p className="text-[0.72rem] uppercase tracking-[0.24em] text-accent-soft">PERSONALIZED STRATEGY</p>
             <p className="mt-3 font-display text-2xl tracking-[-0.04em] text-white">
               Designed around your goals.
@@ -147,13 +148,13 @@ function AboutExperienceSection() {
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div className="relative min-h-[620px] lg:pr-10">
+        <div className="relative min-h-[520px] lg:min-h-[620px] lg:pr-10">
           <div className="absolute left-4 top-8 z-0 text-[9rem] font-display leading-none tracking-[-0.08em] text-primary/[0.06]">
             15
           </div>
           <ImageReveal className="relative z-10 overflow-hidden rounded-5xl shadow-premium">
-            <div className="relative min-h-[540px] rounded-5xl border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(233,243,245,0.9))] p-6 sm:p-8">
-              <div className="dark-panel flex min-h-[474px] flex-col justify-between rounded-[2rem] p-7 sm:p-8">
+            <div className="relative min-h-[440px] rounded-5xl border border-white/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(233,243,245,0.9))] p-6 sm:min-h-[540px] sm:p-8">
+              <div className="dark-panel flex min-h-[390px] flex-col justify-between rounded-[2rem] p-7 sm:min-h-[474px] sm:p-8">
                 <div>
                   <p className="text-[0.66rem] font-semibold uppercase tracking-[0.24em] text-accent-soft">
                     RELATIONSHIP-FIRST ADVISORY
@@ -311,7 +312,7 @@ function WhyPinnacleSection() {
         </div>
         <div className="relative">
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[620px] overflow-hidden rounded-[2.8rem]">
+            <div className="relative h-[420px] overflow-hidden rounded-[2.8rem] sm:h-[620px]">
               <Image
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
                 alt="Clients in a thoughtful planning meeting"
@@ -339,7 +340,12 @@ function AdvisorsSection() {
           title="Expertise You Can Trust. Relationships You Can Count On."
           description="A boutique advisory team built for thoughtful strategy, calm decision-making, and long-term alignment."
         />
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div
+          className={cn(
+            "mt-12 grid gap-8",
+            advisors.length === 1 ? "mx-auto max-w-[34rem]" : "lg:grid-cols-3",
+          )}
+        >
           {advisors.map((advisor) => (
             <AdvisorCard key={advisor.slug} advisor={advisor} />
           ))}

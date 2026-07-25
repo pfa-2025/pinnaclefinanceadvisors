@@ -23,7 +23,7 @@ export default function SchedulePage() {
               href={contactDetails.calendlyUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-5 py-2.5 text-[0.92rem] font-semibold text-primary transition duration-300 hover:bg-white/90"
+              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-white px-5 py-2.5 text-[0.92rem] font-semibold !text-primary transition duration-300 hover:bg-white/90 hover:!text-primary"
             >
               Book 30-Minute Meeting
             </a>
