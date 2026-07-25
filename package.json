@@ -1,0 +1,34 @@
+{
+  "name": "pinnacle-finance-advisors",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "framer-motion": "^11.3.19",
+    "lucide-react": "^0.453.0",
+    "next": "^15.0.3",
+    "react": "^19.0.0-rc-69d4b800-20241021",
+    "react-dom": "^19.0.0-rc-69d4b800-20241021",
+    "react-hook-form": "^7.53.1",
+    "recharts": "^2.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "eslint": "^9.12.0",
+    "eslint-config-next": "^15.0.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.6.3"
+  }
+}
