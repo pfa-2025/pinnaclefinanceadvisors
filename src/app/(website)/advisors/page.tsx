@@ -1,5 +1,5 @@
-import { advisors } from "@/data/site";
 import { buildMetadata } from "@/lib/metadata";
+import { getObject, getPublicAdvisors, getPublicPage, getString } from "@/lib/public-content";
 import { cn } from "@/lib/utils";
 
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -11,20 +11,31 @@ export const metadata = buildMetadata(
   "Meet the Pinnacle Finance Advisors team and explore the specialties behind our client relationships.",
 );
 
-export default function AdvisorsPage() {
+export default async function AdvisorsPage() {
+  const [page, advisors] = await Promise.all([getPublicPage("advisors"), getPublicAdvisors()]);
+  const content = getObject(page.contentJson);
+  const hero = getObject(content.hero);
+  const spotlight = getObject(content.spotlight);
+
   return (
     <>
       <PageHero
-        eyebrow="MEET THE TEAM"
-        title="Trusted advisors with strategic depth and a personal way of working."
-        description="Our team brings calm judgment, coordinated planning, and genuine care to every client relationship."
+        eyebrow={getString(hero.eyebrow, "MEET THE TEAM")}
+        title={getString(hero.title, "Trusted advisors with strategic depth and a personal way of working.")}
+        description={getString(
+          hero.description,
+          "Our team brings calm judgment, coordinated planning, and genuine care to every client relationship.",
+        )}
       />
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell">
           <SectionHeading
-            eyebrow="ADVISOR SPOTLIGHT"
-            title="A boutique team built for thoughtful, human-centered planning."
-            description="We combine financial rigor with the kind of ongoing communication that makes important decisions feel clearer."
+            eyebrow={getString(spotlight.eyebrow, "ADVISOR SPOTLIGHT")}
+            title={getString(spotlight.title, "A boutique team built for thoughtful, human-centered planning.")}
+            description={getString(
+              spotlight.description,
+              "We combine financial rigor with the kind of ongoing communication that makes important decisions feel clearer.",
+            )}
           />
           <div
             className={cn(

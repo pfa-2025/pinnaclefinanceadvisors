@@ -10,6 +10,7 @@ export interface Service {
   index: string;
   title: string;
   description: string;
+  longDescription?: string;
   benefits: string[];
   image: string;
   metric: string;

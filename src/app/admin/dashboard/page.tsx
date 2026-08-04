@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 
 import { adminGet } from "@/lib/admin-api";
 import { formatAdminDate } from "@/lib/admin-format";
@@ -15,11 +17,30 @@ type DashboardStat = {
   delta: string;
 };
 
+type DashboardSummary = {
+  eyebrow: string;
+  title: string;
+  description: string;
+};
+
+type DashboardQuickAction = {
+  label: string;
+  detail: string;
+  href: string;
+};
+
 type DashboardChartPoint = {
   name: string;
-  traffic: number;
+  contentUpdates: number;
   enquiries: number;
   consultations: number;
+};
+
+type PublishingCounts = {
+  published: number;
+  draft: number;
+  review: number;
+  archived: number;
 };
 
 type DashboardEnquiry = {
@@ -39,8 +60,16 @@ type DashboardConsultation = {
 };
 
 type DashboardResponse = {
+  summary: DashboardSummary;
   stats: DashboardStat[];
   charts: DashboardChartPoint[];
+  quickActions: DashboardQuickAction[];
+  publishing: {
+    homepageStatus: string | null;
+    pages: PublishingCounts;
+    services: PublishingCounts;
+    insights: PublishingCounts;
+  };
   recentEnquiries: DashboardEnquiry[];
   upcomingConsultations: DashboardConsultation[];
 };
@@ -78,6 +107,75 @@ type SnapshotItem = {
   detail: string;
 };
 
+const dashboardResponseSchema = z.object({
+  summary: z.object({
+    eyebrow: z.string(),
+    title: z.string(),
+    description: z.string(),
+  }),
+  stats: z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+      delta: z.string(),
+    }),
+  ),
+  charts: z.array(
+    z.object({
+      name: z.string(),
+      contentUpdates: z.number(),
+      enquiries: z.number(),
+      consultations: z.number(),
+    }),
+  ),
+  quickActions: z.array(
+    z.object({
+      label: z.string(),
+      detail: z.string(),
+      href: z.string(),
+    }),
+  ),
+  publishing: z.object({
+    homepageStatus: z.string().nullable(),
+    pages: z.object({
+      published: z.number(),
+      draft: z.number(),
+      review: z.number(),
+      archived: z.number(),
+    }),
+    services: z.object({
+      published: z.number(),
+      draft: z.number(),
+      review: z.number(),
+      archived: z.number(),
+    }),
+    insights: z.object({
+      published: z.number(),
+      draft: z.number(),
+      review: z.number(),
+      archived: z.number(),
+    }),
+  }),
+  recentEnquiries: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      focus: z.string(),
+      status: z.string(),
+      createdAt: z.string(),
+    }),
+  ),
+  upcomingConsultations: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      advisor: z.string(),
+      date: z.string(),
+      status: z.string(),
+    }),
+  ),
+});
+
 function buildContentRows(pages: PageLikeItem[], insights: InsightItem[]): AdminTableRow[] {
   return [...pages, ...insights]
     .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime())
@@ -101,26 +199,25 @@ function buildServiceRows(services: ServiceItem[]): AdminTableRow[] {
   }));
 }
 
-function buildSnapshot(homepage: PageLikeItem | undefined, pages: PageLikeItem[], services: ServiceItem[], insights: InsightItem[]): SnapshotItem[] {
-  const countByStatus = <T extends { status: string }>(items: T[], status: string) =>
-    items.filter((item) => item.status === status).length;
-
+function buildSnapshot(overview: DashboardResponse): SnapshotItem[] {
   return [
     {
       label: "Homepage",
-      detail: homepage ? `Current status: ${homepage.status}` : "Homepage content has not been created yet.",
+      detail: overview.publishing.homepageStatus
+        ? `Current status: ${overview.publishing.homepageStatus}`
+        : "Homepage content has not been created yet.",
     },
     {
       label: "Pages",
-      detail: `${countByStatus(pages, "PUBLISHED")} published, ${countByStatus(pages, "DRAFT")} draft`,
+      detail: `${overview.publishing.pages.published} published, ${overview.publishing.pages.draft} draft, ${overview.publishing.pages.review} in review`,
     },
     {
       label: "Services",
-      detail: `${countByStatus(services, "PUBLISHED")} published, ${countByStatus(services, "DRAFT")} draft`,
+      detail: `${overview.publishing.services.published} published, ${overview.publishing.services.draft} draft, ${overview.publishing.services.review} in review`,
     },
     {
       label: "Insights",
-      detail: `${countByStatus(insights, "PUBLISHED")} published, ${countByStatus(insights, "DRAFT")} draft`,
+      detail: `${overview.publishing.insights.published} published, ${overview.publishing.insights.draft} draft, ${overview.publishing.insights.review} in review`,
     },
   ];
 }
@@ -141,17 +238,22 @@ export default function AdminDashboardPage() {
       try {
         const [dashboardData, pageData, serviceData, insightData] = await Promise.all([
           adminGet<DashboardResponse>("/admin/dashboard"),
-          adminGet<ListResponse<PageLikeItem>>("/admin/pages"),
-          adminGet<ListResponse<ServiceItem>>("/admin/services"),
-          adminGet<ListResponse<InsightItem>>("/admin/insights"),
+          adminGet<ListResponse<PageLikeItem>>("/admin/pages?limit=100"),
+          adminGet<ListResponse<ServiceItem>>("/admin/services?limit=100"),
+          adminGet<ListResponse<InsightItem>>("/admin/insights?limit=100"),
         ]);
 
-        setOverview(dashboardData);
+        setOverview(dashboardResponseSchema.parse(dashboardData));
         setPages(pageData.items);
         setServices(serviceData.items);
         setInsights(insightData.items);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard data.");
+        setOverview(null);
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load dashboard data.",
+        );
       } finally {
         setLoading(false);
       }
@@ -162,22 +264,21 @@ export default function AdminDashboardPage() {
 
   const contentRows = useMemo(() => buildContentRows(pages, insights), [insights, pages]);
   const serviceRows = useMemo(() => buildServiceRows(services), [services]);
-  const snapshotItems = useMemo(
-    () => buildSnapshot(pages.find((item) => item.slug === "home"), pages, services, insights),
-    [insights, pages, services],
-  );
+  const snapshotItems = useMemo(() => (overview ? buildSnapshot(overview) : []), [overview]);
   const chartData = overview?.charts.slice(-6) ?? [];
 
   return (
     <div className="space-y-6">
       <section className="rounded-5xl bg-primary px-6 py-8 text-white shadow-premium">
-        <p className="text-xs uppercase tracking-[0.26em] text-accent-soft">Welcome back</p>
-        <h2 className="mt-3 font-display text-4xl tracking-[-0.05em]">
-          The advisory experience is performing steadily.
-        </h2>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70">
-          Website traffic, consultation requests, and content publishing are all trending upward this month.
-        </p>
+        {overview ? (
+          <>
+            <p className="text-xs uppercase tracking-[0.26em] text-accent-soft">{overview.summary.eyebrow}</p>
+            <h2 className="mt-3 font-display text-4xl tracking-[-0.05em]">{overview.summary.title}</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70">{overview.summary.description}</p>
+          </>
+        ) : (
+          <p className="text-sm text-white/70">Loading live dashboard...</p>
+        )}
       </section>
 
       {error ? (
@@ -192,20 +293,28 @@ export default function AdminDashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <ChartCard title="Website Traffic" dataKey="traffic" data={chartData} />
+          <ChartCard title="Content Updates" dataKey="contentUpdates" data={chartData} />
         </div>
         <div className="rounded-5xl bg-white p-6 shadow-soft">
           <p className="text-xs uppercase tracking-[0.26em] text-muted">Quick Actions</p>
           <h3 className="mt-2 font-display text-2xl tracking-[-0.05em] text-primary">What would you like to update?</h3>
           <div className="mt-6 grid gap-3">
-            {["Create article", "Review enquiries", "Publish CTA update", "Upload media"].map((action) => (
-              <button
-                key={action}
-                className="rounded-4xl border border-line bg-[#f8fbfc] px-4 py-4 text-left text-sm font-medium text-primary transition hover:bg-[#eef6f7]"
-              >
-                {action}
-              </button>
-            ))}
+            {loading && !overview ? (
+              <p className="text-sm text-muted">Loading action queue...</p>
+            ) : overview && overview.quickActions.length === 0 ? (
+              <p className="text-sm text-muted">No open admin actions right now.</p>
+            ) : (
+              overview?.quickActions.map((action) => (
+                <Link
+                  key={action.href + action.label}
+                  href={action.href}
+                  className="rounded-4xl border border-line bg-[#f8fbfc] px-4 py-4 text-left transition hover:bg-[#eef6f7]"
+                >
+                  <p className="text-sm font-medium text-primary">{action.label}</p>
+                  <p className="mt-1 text-xs leading-6 text-muted">{action.detail}</p>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>

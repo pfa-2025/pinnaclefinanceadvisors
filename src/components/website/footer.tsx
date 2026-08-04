@@ -2,11 +2,13 @@ import Link from "next/link";
 
 import { contactDetails, socialLinks } from "@/constants/contact";
 import { websiteNavigation } from "@/constants/navigation";
-import { services } from "@/data/site";
+import { getPublicServices } from "@/lib/public-content";
 
 import { BrandLogo } from "@/components/shared/brand-logo";
 
-export function Footer() {
+export async function Footer() {
+  const services = await getPublicServices().catch(() => []);
+
   return (
     <footer className="relative overflow-hidden bg-primary px-4 pb-12 pt-24 text-white sm:px-6 lg:px-10">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 text-center font-display text-[20vw] font-semibold tracking-[-0.08em] text-white/[0.03]">

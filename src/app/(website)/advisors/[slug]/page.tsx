@@ -1,16 +1,12 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { advisors } from "@/data/site";
 import { buildMetadata } from "@/lib/metadata";
+import { getPublicAdvisor } from "@/lib/public-content";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
-
-export async function generateStaticParams() {
-  return advisors.map((advisor) => ({ slug: advisor.slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -18,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const advisor = advisors.find((item) => item.slug === slug);
+  const advisor = await getPublicAdvisor(slug).catch(() => null);
 
   return buildMetadata(advisor?.name ?? "Advisor", advisor?.bio);
 }
@@ -29,7 +25,7 @@ export default async function AdvisorProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const advisor = advisors.find((item) => item.slug === slug);
+  const advisor = await getPublicAdvisor(slug).catch(() => null);
 
   if (!advisor) notFound();
 
@@ -44,8 +40,8 @@ export default async function AdvisorProfilePage({
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[420px] overflow-hidden rounded-[2.8rem] sm:h-[620px]">
-              <Image src={advisor.image} alt={advisor.name} fill className="object-cover" />
+            <div className="h-[420px] overflow-hidden rounded-[2.8rem] sm:h-[620px]">
+              <ContentImage src={advisor.image} alt={advisor.name} />
             </div>
           </ImageReveal>
           <div>

@@ -1,21 +1,20 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import type { Advisor } from "@/types";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 
 export function AdvisorCard({ advisor }: { advisor: Advisor }) {
   return (
     <FadeUp>
       <Link href={`/advisors/${advisor.slug}`} className="group block w-full">
         <ImageReveal className="rounded-5xl">
-          <div className="relative h-[320px] overflow-hidden rounded-5xl sm:h-[420px]">
-            <Image
+          <div className="h-[320px] overflow-hidden rounded-5xl sm:h-[420px]">
+            <ContentImage
               src={advisor.image}
               alt={advisor.name}
-              fill
-              className="object-cover transition duration-700 group-hover:scale-105"
+              className="transition duration-700 group-hover:scale-105"
             />
           </div>
         </ImageReveal>

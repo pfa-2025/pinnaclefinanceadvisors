@@ -1,16 +1,12 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { services } from "@/data/site";
 import { buildMetadata } from "@/lib/metadata";
+import { getPublicService } from "@/lib/public-content";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
-
-export async function generateStaticParams() {
-  return services.map((service) => ({ slug: service.slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -18,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = services.find((item) => item.slug === slug);
+  const service = await getPublicService(slug).catch(() => null);
 
   if (!service) return buildMetadata("Service");
 
@@ -31,7 +27,7 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = services.find((item) => item.slug === slug);
+  const service = await getPublicService(slug).catch(() => null);
 
   if (!service) notFound();
 
@@ -62,12 +58,13 @@ export default async function ServiceDetailPage({
               ))}
             </div>
             <FadeUp className="mt-8 max-w-3xl text-lg leading-8 text-muted">
-              Our role is to make this area of your financial life easier to understand, easier to coordinate, and more resilient as your priorities evolve.
+              {service.longDescription ??
+                "Our role is to make this area of your financial life easier to understand, easier to coordinate, and more resilient as your priorities evolve."}
             </FadeUp>
           </div>
           <ImageReveal className="rounded-[2.8rem]">
-            <div className="relative h-[380px] overflow-hidden rounded-[2.8rem] sm:h-[520px]">
-              <Image src={service.image} alt={service.title} fill className="object-cover" />
+            <div className="h-[380px] overflow-hidden rounded-[2.8rem] sm:h-[520px]">
+              <ContentImage src={service.image} alt={service.title} />
             </div>
           </ImageReveal>
         </div>

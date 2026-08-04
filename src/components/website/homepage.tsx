@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { advisors, homepageStats, insights, services } from "@/data/site";
+import { getObject, getString, getStringArray } from "@/lib/public-content";
 import { cn } from "@/lib/utils";
+import type { Advisor, Insight, Service, Stat } from "@/types";
 
 import {
   FadeIn,
@@ -23,26 +24,49 @@ import { LineGraph } from "@/components/website/line-graph";
 import { ServiceShowcase } from "@/components/website/service-showcase";
 import { TrustMarquee } from "@/components/website/trust-marquee";
 
-export function Homepage() {
+export function Homepage({
+  advisors,
+  homepageStats,
+  insights,
+  page,
+  services,
+}: {
+  advisors: Advisor[];
+  homepageStats: Stat[];
+  insights: Insight[];
+  page?: Record<string, unknown>;
+  services: Service[];
+}) {
+  const hero = getObject(page?.hero);
+  const introduction = getObject(page?.introduction);
+  const about = getObject(page?.about);
+  const servicesContent = getObject(page?.services);
+  const philosophy = getObject(page?.philosophy);
+  const whyPinnacle = getObject(page?.whyPinnacle);
+  const advisorsContent = getObject(page?.advisors);
+  const journey = getObject(page?.journey);
+  const insightsContent = getObject(page?.insights);
+  const finalCta = getObject(page?.finalCta);
+
   return (
     <>
-      <HeroSection />
+      <HeroSection hero={hero} />
       <TrustMarquee />
-      <IntroductionSection />
-      <AboutExperienceSection />
-      <ServicesSection />
-      <PhilosophySection />
-      <StatisticsSection />
-      <WhyPinnacleSection />
-      <AdvisorsSection />
-      <JourneySection />
-      <InsightsSection />
-      <FinalCtaSection />
+      <IntroductionSection introduction={introduction} />
+      <AboutExperienceSection about={about} />
+      <ServicesSection services={services} servicesContent={servicesContent} />
+      <PhilosophySection philosophy={philosophy} />
+      <StatisticsSection homepageStats={homepageStats} />
+      <WhyPinnacleSection whyPinnacle={whyPinnacle} />
+      <AdvisorsSection advisors={advisors} advisorsContent={advisorsContent} />
+      <JourneySection journey={journey} />
+      <InsightsSection insights={insights} insightsContent={insightsContent} />
+      <FinalCtaSection finalCta={finalCta} />
     </>
   );
 }
 
-function HeroSection() {
+function HeroSection({ hero }: { hero: Record<string, unknown> }) {
   return (
     <section className="relative overflow-hidden bg-primary px-4 pb-18 pt-34 text-white sm:px-6 lg:px-10">
       <div className="absolute inset-0 bg-hero-radial" />
@@ -50,29 +74,32 @@ function HeroSection() {
       <div className="container-shell relative grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
         <div className="max-w-3xl">
           <FadeUp>
-            <p className="eyebrow">PRIVATE WEALTH • FINANCIAL CLARITY • LASTING CONFIDENCE</p>
+            <p className="eyebrow">
+              {getString(hero.eyebrow, "PRIVATE WEALTH • FINANCIAL CLARITY • LASTING CONFIDENCE")}
+            </p>
           </FadeUp>
           <div className="mt-7">
             <h1 className="display-title font-display font-semibold text-balance">
-              <TextReveal text="Your Ambition." />
-              <span className="mt-2 block text-accent-soft">
-                <span className="editorial-title">Our Strategy.</span>
-              </span>
-              <TextReveal text="A Future Without Limits." />
+              <TextReveal text={getString(hero.title, "Your Ambition. Our Strategy. A Future Without Limits.")} />
             </h1>
           </div>
           <FadeUp className="mt-6 max-w-xl text-[1rem] leading-7 text-white/70">
-            Personalized financial guidance designed to transform complex decisions into clear strategies for your future.
+            {getString(
+              hero.description,
+              "Personalized financial guidance designed to transform complex decisions into clear strategies for your future.",
+            )}
           </FadeUp>
           <StaggerContainer className="mt-8 flex flex-wrap gap-3">
             <StaggerItem>
               <MagneticButton>
-                <ButtonLink href="/schedule">Start Your Financial Journey</ButtonLink>
+                <ButtonLink href={getString(hero.primaryCtaHref, "/schedule")}>
+                  {getString(hero.primaryCtaLabel, "Start Your Financial Journey")}
+                </ButtonLink>
               </MagneticButton>
             </StaggerItem>
             <StaggerItem>
-              <ButtonLink href="/expertise" variant="secondary">
-                Explore Our Expertise
+              <ButtonLink href={getString(hero.secondaryCtaHref, "/expertise")} variant="secondary">
+                {getString(hero.secondaryCtaLabel, "Explore Our Expertise")}
               </ButtonLink>
             </StaggerItem>
           </StaggerContainer>
@@ -121,16 +148,19 @@ function HeroSection() {
   );
 }
 
-function IntroductionSection() {
+function IntroductionSection({ introduction }: { introduction: Record<string, unknown> }) {
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell">
         <FadeUp className="max-w-5xl">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-accent">BEYOND FINANCIAL ADVICE</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-accent">
+            {getString(introduction.eyebrow, "BEYOND FINANCIAL ADVICE")}
+          </p>
           <h2 className="mt-5 section-title max-w-5xl text-balance text-[clamp(2.2rem,4.8vw,4.2rem)] leading-[1.02] text-primary">
-            We believe wealth is more than numbers.{" "}
-            <span className="text-accent">It&apos;s the freedom</span> to live with confidence, protect what matters, and build the future{" "}
-            <span className="editorial-title text-primary-deep">you envision.</span>
+            {getString(
+              introduction.title,
+              "We believe wealth is more than numbers. It's the freedom to live with confidence, protect what matters, and build the future you envision.",
+            )}
           </h2>
         </FadeUp>
       </div>
@@ -138,7 +168,7 @@ function IntroductionSection() {
   );
 }
 
-function AboutExperienceSection() {
+function AboutExperienceSection({ about }: { about: Record<string, unknown> }) {
   const pillars = [
     "Long-term planning relationships",
     "Clear guidance through complexity",
@@ -195,12 +225,15 @@ function AboutExperienceSection() {
         </div>
         <div>
           <SectionHeading
-            eyebrow="ABOUT THE EXPERIENCE"
-            title="Financial Guidance Built Around Your Life."
-            description="Every financial journey is different. We combine personalized strategies, experienced guidance, and long-term relationships to help our clients move forward with confidence."
+            eyebrow={getString(about.eyebrow, "ABOUT THE EXPERIENCE")}
+            title={getString(about.title, "Financial Guidance Built Around Your Life.")}
+            description={getString(
+              about.description,
+              "Every financial journey is different. We combine personalized strategies, experienced guidance, and long-term relationships to help our clients move forward with confidence.",
+            )}
           />
-          <ButtonLink href="/about" className="mt-8">
-            Discover Our Story
+          <ButtonLink href={getString(about.ctaHref, "/about")} className="mt-8">
+            {getString(about.ctaLabel, "Discover Our Story")}
           </ButtonLink>
         </div>
       </div>
@@ -208,14 +241,23 @@ function AboutExperienceSection() {
   );
 }
 
-function ServicesSection() {
+function ServicesSection({
+  services,
+  servicesContent,
+}: {
+  services: Service[];
+  servicesContent: Record<string, unknown>;
+}) {
   return (
     <section className="section-space bg-primary-deep px-4 sm:px-6 lg:px-10">
       <div className="container-shell">
         <SectionHeading
-          eyebrow="OUR EXPERTISE"
-          title="Strategies Designed for Every Chapter of Your Life."
-          description="A planning platform that evolves with transitions, opportunities, and long-range ambitions."
+          eyebrow={getString(servicesContent.eyebrow, "OUR EXPERTISE")}
+          title={getString(servicesContent.title, "Strategies Designed for Every Chapter of Your Life.")}
+          description={getString(
+            servicesContent.description,
+            "A planning platform that evolves with transitions, opportunities, and long-range ambitions.",
+          )}
           inverted
         />
         <div className="mt-12">
@@ -226,7 +268,7 @@ function ServicesSection() {
   );
 }
 
-function PhilosophySection() {
+function PhilosophySection({ philosophy }: { philosophy: Record<string, unknown> }) {
   const principles = [
     ["01", "UNDERSTAND", "We begin by understanding your goals, priorities, and vision."],
     ["02", "DESIGN", "We create strategies tailored specifically to your financial life."],
@@ -237,9 +279,12 @@ function PhilosophySection() {
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell">
         <SectionHeading
-          eyebrow="FINANCIAL PHILOSOPHY"
-          title="Clarity Today. Confidence Tomorrow."
-          description="Our process is deliberate, collaborative, and designed to keep strategy aligned with real life."
+          eyebrow={getString(philosophy.eyebrow, "FINANCIAL PHILOSOPHY")}
+          title={getString(philosophy.title, "Clarity Today. Confidence Tomorrow.")}
+          description={getString(
+            philosophy.description,
+            "Our process is deliberate, collaborative, and designed to keep strategy aligned with real life.",
+          )}
         />
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {principles.map(([index, title, text]) => (
@@ -256,7 +301,7 @@ function PhilosophySection() {
   );
 }
 
-function StatisticsSection() {
+function StatisticsSection({ homepageStats }: { homepageStats: Stat[] }) {
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell rounded-[2.8rem] bg-primary px-6 py-10 text-white shadow-premium sm:px-8 lg:px-12 lg:py-14">
@@ -281,23 +326,29 @@ function StatisticsSection() {
   );
 }
 
-function WhyPinnacleSection() {
-  const benefits = [
-    "Personalized Guidance",
-    "Transparent Communication",
-    "Long-Term Relationships",
-    "Strategic Thinking",
-    "Comprehensive Planning",
-  ];
+function WhyPinnacleSection({ whyPinnacle }: { whyPinnacle: Record<string, unknown> }) {
+  const benefits =
+    getStringArray(whyPinnacle.benefits).length > 0
+      ? getStringArray(whyPinnacle.benefits)
+      : [
+          "Personalized Guidance",
+          "Transparent Communication",
+          "Long-Term Relationships",
+          "Strategic Thinking",
+          "Comprehensive Planning",
+        ];
 
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
         <div>
           <SectionHeading
-            eyebrow="WHY PINNACLE"
-            title="Financial Advice Should Feel Personal."
-            description="We help clients feel informed, heard, and ready to move forward with decisions that match the lives they are building."
+            eyebrow={getString(whyPinnacle.eyebrow, "WHY PINNACLE")}
+            title={getString(whyPinnacle.title, "Financial Advice Should Feel Personal.")}
+            description={getString(
+              whyPinnacle.description,
+              "We help clients feel informed, heard, and ready to move forward with decisions that match the lives they are building.",
+            )}
           />
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {benefits.map((benefit) => (
@@ -331,14 +382,23 @@ function WhyPinnacleSection() {
   );
 }
 
-function AdvisorsSection() {
+function AdvisorsSection({
+  advisors,
+  advisorsContent,
+}: {
+  advisors: Advisor[];
+  advisorsContent: Record<string, unknown>;
+}) {
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell">
         <SectionHeading
-          eyebrow="ADVISORS"
-          title="Expertise You Can Trust. Relationships You Can Count On."
-          description="A boutique advisory team built for thoughtful strategy, calm decision-making, and long-term alignment."
+          eyebrow={getString(advisorsContent.eyebrow, "ADVISORS")}
+          title={getString(advisorsContent.title, "Expertise You Can Trust. Relationships You Can Count On.")}
+          description={getString(
+            advisorsContent.description,
+            "A boutique advisory team built for thoughtful strategy, calm decision-making, and long-term alignment.",
+          )}
         />
         <div
           className={cn(
@@ -355,7 +415,7 @@ function AdvisorsSection() {
   );
 }
 
-function JourneySection() {
+function JourneySection({ journey }: { journey: Record<string, unknown> }) {
   const steps = [
     ["01", "Discover", "We listen deeply to understand context, concerns, and ambition."],
     ["02", "Define", "Together we clarify priorities and build a decision framework."],
@@ -369,9 +429,9 @@ function JourneySection() {
       <div className="container-shell grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
         <div className="lg:sticky lg:top-32 lg:self-start">
           <SectionHeading
-            eyebrow="CLIENT JOURNEY"
-            title="Your Path to Financial Confidence."
-            description="A steady process designed to turn complexity into momentum."
+            eyebrow={getString(journey.eyebrow, "CLIENT JOURNEY")}
+            title={getString(journey.title, "Your Path to Financial Confidence.")}
+            description={getString(journey.description, "A steady process designed to turn complexity into momentum.")}
           />
         </div>
         <div className="space-y-4">
@@ -392,29 +452,42 @@ function JourneySection() {
   );
 }
 
-function InsightsSection() {
+function InsightsSection({
+  insights,
+  insightsContent,
+}: {
+  insights: Insight[];
+  insightsContent: Record<string, unknown>;
+}) {
+  const featuredInsight = insights[0];
+
   return (
     <section className="section-space px-4 sm:px-6 lg:px-10">
       <div className="container-shell">
         <SectionHeading
-          eyebrow="INSIGHTS"
-          title="Perspective for What's Next."
-          description="Editorial thinking for major decisions, market perspective, and life-stage planning."
+          eyebrow={getString(insightsContent.eyebrow, "INSIGHTS")}
+          title={getString(insightsContent.title, "Perspective for What's Next.")}
+          description={getString(
+            insightsContent.description,
+            "Editorial thinking for major decisions, market perspective, and life-stage planning.",
+          )}
         />
-        <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <InsightCard insight={insights[0]} featured />
-          <div className="grid gap-8">
-            {insights.slice(1).map((insight) => (
-              <InsightCard key={insight.slug} insight={insight} />
-            ))}
+        {featuredInsight ? (
+          <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <InsightCard insight={featuredInsight} featured />
+            <div className="grid gap-8">
+              {insights.slice(1).map((insight) => (
+                <InsightCard key={insight.slug} insight={insight} />
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );
 }
 
-function FinalCtaSection() {
+function FinalCtaSection({ finalCta }: { finalCta: Record<string, unknown> }) {
   return (
     <section className="px-4 pb-24 sm:px-6 lg:px-10">
       <div className="container-shell">
@@ -424,17 +497,24 @@ function FinalCtaSection() {
             <LineGraph dark />
           </div>
           <div className="relative max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.32em] text-accent-soft">START THE CONVERSATION</p>
+            <p className="text-xs uppercase tracking-[0.32em] text-accent-soft">
+              {getString(finalCta.eyebrow, "START THE CONVERSATION")}
+            </p>
             <h2 className="mt-6 section-title text-white">
-              The Future You&apos;re Planning For Starts With a Conversation.
+              {getString(finalCta.title, "The Future You're Planning For Starts With a Conversation.")}
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/70">
-              Let&apos;s create a financial strategy designed around your goals, your life, and your future.
+              {getString(
+                finalCta.description,
+                "Let's create a financial strategy designed around your goals, your life, and your future.",
+              )}
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <ButtonLink href="/schedule">Schedule a Consultation</ButtonLink>
-              <ButtonLink href="/contact" variant="secondary">
-                Contact Our Team
+              <ButtonLink href={getString(finalCta.primaryCtaHref, "/schedule")}>
+                {getString(finalCta.primaryCtaLabel, "Schedule a Consultation")}
+              </ButtonLink>
+              <ButtonLink href={getString(finalCta.secondaryCtaHref, "/contact")} variant="secondary">
+                {getString(finalCta.secondaryCtaLabel, "Contact Our Team")}
               </ButtonLink>
             </div>
           </div>

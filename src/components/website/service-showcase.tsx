@@ -1,16 +1,31 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Service } from "@/types";
 
 import { FadeUp } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 
 export function ServiceShowcase({ services }: { services: Service[] }) {
-  const [active, setActive] = useState(services[0]);
+  const [activeSlug, setActiveSlug] = useState(services[0]?.slug ?? "");
+  const active = services.find((service) => service.slug === activeSlug) ?? services[0];
+
+  useEffect(() => {
+    if (!active && services[0]) {
+      setActiveSlug(services[0].slug);
+    }
+  }, [active, services]);
+
+  if (!active) {
+    return (
+      <div className="rounded-5xl border border-white/10 bg-white/[0.03] p-8 text-sm text-white/70">
+        No services are published yet.
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-10 lg:grid-cols-[0.84fr_1.16fr] lg:items-start">
@@ -19,9 +34,9 @@ export function ServiceShowcase({ services }: { services: Service[] }) {
           <button
             key={service.slug}
             type="button"
-            onMouseEnter={() => setActive(service)}
-            onFocus={() => setActive(service)}
-            onClick={() => setActive(service)}
+            onMouseEnter={() => setActiveSlug(service.slug)}
+            onFocus={() => setActiveSlug(service.slug)}
+            onClick={() => setActiveSlug(service.slug)}
             className={`flex w-full items-center justify-between rounded-4xl border px-5 py-5 text-left transition ${
               active.slug === service.slug
                 ? "border-white/20 bg-white/10 text-white"
@@ -46,8 +61,8 @@ export function ServiceShowcase({ services }: { services: Service[] }) {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.35 }}
           >
-            <div className="relative h-[240px] overflow-hidden rounded-4xl sm:h-[320px]">
-              <Image src={active.image} alt={active.title} fill className="object-cover" />
+            <div className="h-[240px] overflow-hidden rounded-4xl sm:h-[320px]">
+              <ContentImage src={active.image} alt={active.title} />
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <div>

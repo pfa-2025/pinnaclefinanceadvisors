@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import type { Insight } from "@/types";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 
 export function InsightCard({
   insight,
@@ -16,12 +16,11 @@ export function InsightCard({
     <FadeUp className={featured ? "lg:row-span-2" : ""}>
       <Link href={`/insights/${insight.slug}`} className="group block">
         <ImageReveal className="rounded-5xl">
-          <div className={`relative overflow-hidden rounded-5xl ${featured ? "h-[320px] sm:h-[420px]" : "h-[240px] sm:h-[280px]"}`}>
-            <Image
+          <div className={`overflow-hidden rounded-5xl ${featured ? "h-[320px] sm:h-[420px]" : "h-[240px] sm:h-[280px]"}`}>
+            <ContentImage
               src={insight.image}
               alt={insight.title}
-              fill
-              className="object-cover transition duration-700 group-hover:scale-105"
+              className="transition duration-700 group-hover:scale-105"
             />
           </div>
         </ImageReveal>
