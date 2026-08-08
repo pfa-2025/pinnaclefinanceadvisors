@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { adminGet, adminPatch, adminPost } from "@/lib/admin-api";
-import { formatAdminDate, formatArrayInput, parseArrayInput } from "@/lib/admin-format";
+import { formatAdminDate, formatArrayInput, parseArrayInput, sanitizeArrayInput } from "@/lib/admin-format";
 
 import { ContentPanel } from "@/components/admin/content-panel";
 import { type AdminTableRow, DataTable } from "@/components/admin/data-table";
@@ -71,6 +71,7 @@ const pageDefinitions: Record<string, PageDefinition> = {
       { section: "Hero", path: "contentJson.hero.primaryCtaHref", label: "Primary CTA Link", type: "text" },
       { section: "Hero", path: "contentJson.hero.secondaryCtaLabel", label: "Secondary CTA Label", type: "text" },
       { section: "Hero", path: "contentJson.hero.secondaryCtaHref", label: "Secondary CTA Link", type: "text" },
+      { section: "Trust Marquee", path: "contentJson.marquee.items", label: "Ticker Items", type: "array", rows: 6 },
       { section: "Introduction", path: "contentJson.introduction.eyebrow", label: "Eyebrow", type: "text" },
       { section: "Introduction", path: "contentJson.introduction.title", label: "Title", type: "textarea", rows: 4 },
       { section: "About Experience", path: "contentJson.about.eyebrow", label: "Eyebrow", type: "text" },
@@ -94,6 +95,9 @@ const pageDefinitions: Record<string, PageDefinition> = {
       { section: "Journey", path: "contentJson.journey.eyebrow", label: "Eyebrow", type: "text" },
       { section: "Journey", path: "contentJson.journey.title", label: "Title", type: "textarea", rows: 3 },
       { section: "Journey", path: "contentJson.journey.description", label: "Description", type: "textarea", rows: 3 },
+      { section: "Gallery", path: "contentJson.gallery.eyebrow", label: "Eyebrow", type: "text" },
+      { section: "Gallery", path: "contentJson.gallery.title", label: "Title", type: "textarea", rows: 3 },
+      { section: "Gallery", path: "contentJson.gallery.description", label: "Description", type: "textarea", rows: 3 },
       { section: "Insights", path: "contentJson.insights.eyebrow", label: "Eyebrow", type: "text" },
       { section: "Insights", path: "contentJson.insights.title", label: "Title", type: "textarea", rows: 3 },
       { section: "Insights", path: "contentJson.insights.description", label: "Description", type: "textarea", rows: 3 },
@@ -264,6 +268,19 @@ function groupFields(fields: FieldConfig[]) {
   }, []);
 }
 
+function sanitizeArrayFields(record: Record<string, unknown>, fieldsList: FieldConfig[]) {
+  let next = record;
+  for (const field of fieldsList) {
+    if (field.type === "array") {
+      const value = getValueByPath(next, field.path);
+      if (Array.isArray(value)) {
+        next = setValueByPath(next, field.path, sanitizeArrayInput(value as string[]));
+      }
+    }
+  }
+  return next;
+}
+
 function toPayload(record: Record<string, unknown>) {
   return {
     slug: String(record.slug ?? ""),
@@ -374,7 +391,8 @@ export default function AdminPagesPage() {
     setError(null);
 
     try {
-      await adminPatch(`/admin/pages/${selectedItem.id}`, toPayload(draft));
+      const sanitizedDraft = sanitizeArrayFields(draft, definition.fields);
+      await adminPatch(`/admin/pages/${selectedItem.id}`, toPayload(sanitizedDraft));
 
       if (publish) {
         await adminPost(`/admin/pages/${selectedItem.id}/publish`, {});

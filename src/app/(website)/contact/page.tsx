@@ -1,24 +1,31 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicPage, getString } from "@/lib/public-content";
+import { getObject, getPublicPage, getPublicSeo, getString } from "@/lib/public-content";
 
 import { contactDetails, socialLinks } from "@/constants/contact";
+import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ContactForm } from "@/components/website/contact-form";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata(
-  "Contact",
-  "Start a conversation with Pinnacle Finance Advisors about retirement, wealth strategy, or long-term planning.",
-);
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "contact");
+
+  return buildMetadata(
+    "Contact",
+    "Start a conversation with Pinnacle Finance Advisors about retirement, wealth strategy, or long-term planning.",
+    { path: "/contact", seo },
+  );
+}
 
 export default async function ContactPage() {
-  const page = await getPublicPage("contact");
+  const [page, seo] = await Promise.all([getPublicPage("contact"), getPublicSeo("PAGE", "contact")]);
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
   const reachOut = getObject(content.reachOut);
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, "CONTACT")}
         title={getString(hero.title, "Let's begin with the questions that matter most.")}
@@ -60,9 +67,11 @@ export default async function ContactPage() {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-full border border-line bg-white px-4 py-2 text-primary transition hover:bg-[#f4f8f8]"
+                    aria-label={link.label}
+                    title={link.label}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-primary transition hover:bg-[#f4f8f8]"
                   >
-                    {link.label}
+                    <link.icon size={18} />
                   </a>
                 ))}
               </div>

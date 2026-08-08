@@ -1,5 +1,7 @@
+import { cache } from "react";
+
 import { getApiBaseUrl } from "@/lib/api";
-import type { Advisor, Insight, Service, Stat } from "@/types";
+import type { Advisor, GalleryItem, Insight, NavItem, Service, Stat, Testimonial } from "@/types";
 
 type ApiEnvelope<T> = {
   success?: boolean;
@@ -59,6 +61,45 @@ type PublicInsightRecord = {
 type SitemapEntry = {
   url: string;
   lastModified: string | Date;
+};
+
+type PublicSiteRecord = {
+  settings: {
+    siteName?: string;
+    navLinks?: unknown;
+  };
+  stats: Array<{ label: string; value: string; detail: string }>;
+};
+
+export type PublicSeoRecord = {
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImageUrl?: string | null;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
+  schemaJson?: unknown;
+};
+
+type PublicGalleryRecord = {
+  id: string;
+  title?: string | null;
+  category?: string | null;
+  caption?: string | null;
+  mediaType: "IMAGE" | "VIDEO";
+  imageUrl?: string | null;
+  videoUrl?: string | null;
+};
+
+type PublicTestimonialRecord = {
+  id: string;
+  clientName?: string | null;
+  clientTitle?: string | null;
+  clientImageUrl?: string | null;
+  quote: string;
+  featured: boolean;
 };
 
 const fallbackImages = {
@@ -176,6 +217,58 @@ export async function getPublicInsights() {
 export async function getPublicInsight(slug: string) {
   const insight = await fetchPublic<PublicInsightRecord>(`/public/insights/${slug}`);
   return mapInsight(insight);
+}
+
+export const getPublicSeo = cache(async function getPublicSeo(
+  pageType: "PAGE" | "SERVICE" | "ADVISOR" | "INSIGHT" | "SITE",
+  identifier: string,
+): Promise<PublicSeoRecord | null> {
+  try {
+    return await fetchPublic<PublicSeoRecord>(`/public/seo/${pageType}/${identifier}`);
+  } catch {
+    return null;
+  }
+});
+
+export async function getPublicNavLinks(): Promise<NavItem[]> {
+  try {
+    const data = await fetchPublic<PublicSiteRecord>("/public/site");
+    const rawLinks = Array.isArray(data.settings?.navLinks) ? data.settings.navLinks : [];
+
+    return rawLinks.filter(
+      (item): item is NavItem =>
+        Boolean(item) &&
+        typeof item === "object" &&
+        typeof (item as NavItem).label === "string" &&
+        typeof (item as NavItem).href === "string",
+    );
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublicGallery(): Promise<GalleryItem[]> {
+  try {
+    return await fetchPublic<PublicGalleryRecord[]>("/public/gallery");
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublicTestimonials(): Promise<Testimonial[]> {
+  try {
+    const items = await fetchPublic<PublicTestimonialRecord[]>("/public/testimonials");
+    return items.map((item) => ({
+      id: item.id,
+      clientName: item.clientName,
+      clientTitle: item.clientTitle,
+      clientImageUrl: item.clientImageUrl,
+      quote: item.quote,
+      featured: item.featured,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getPublicSitemap() {

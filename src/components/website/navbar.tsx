@@ -6,13 +6,13 @@ import { AnimatePresence, motion, useReducedMotion, useScroll } from "framer-mot
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { websiteNavigation } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
+import type { NavItem } from "@/types";
 
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { ButtonLink } from "@/components/ui/button";
 
-export function Navbar() {
+export function Navbar({ navLinks }: { navLinks: NavItem[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -44,7 +44,7 @@ export function Navbar() {
           </div>
 
           <nav className="hidden items-center gap-6 lg:flex">
-            {websiteNavigation.map((item) => (
+            {navLinks.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -102,7 +102,7 @@ export function Navbar() {
                 </div>
               </div>
               <div className="space-y-2 py-5">
-                {websiteNavigation.map((item, index) => (
+                {navLinks.map((item, index) => (
                   <motion.div
                     key={item.href}
                     initial={reduceMotion ? false : { opacity: 0, y: 14 }}

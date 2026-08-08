@@ -3,17 +3,29 @@ import Image from "next/image";
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ButtonLink } from "@/components/ui/button";
+import { JsonLd } from "@/components/shared/json-ld";
 import { PageHero } from "@/components/website/page-hero";
+import { TestimonialCard } from "@/components/website/testimonial-card";
+import { TestimonialForm } from "@/components/website/testimonial-form";
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicPage, getString, getStringArray } from "@/lib/public-content";
+import { getObject, getPublicPage, getPublicSeo, getPublicTestimonials, getString, getStringArray } from "@/lib/public-content";
 
-export const metadata = buildMetadata(
-  "About",
-  "Meet the planning philosophy, advisory mindset, and relationship-centered approach behind Pinnacle Finance Advisors.",
-);
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "about");
+
+  return buildMetadata(
+    "About",
+    "Meet the planning philosophy, advisory mindset, and relationship-centered approach behind Pinnacle Finance Advisors.",
+    { path: "/about", seo },
+  );
+}
 
 export default async function AboutPage() {
-  const page = await getPublicPage("about");
+  const [page, testimonials, seo] = await Promise.all([
+    getPublicPage("about"),
+    getPublicTestimonials(),
+    getPublicSeo("PAGE", "about"),
+  ]);
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
   const story = getObject(content.story);
@@ -25,6 +37,7 @@ export default async function AboutPage() {
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, "ABOUT PINNACLE")}
         title={getString(hero.title, "A boutique advisory experience built on trust, perspective, and long-term partnership.")}
@@ -82,6 +95,25 @@ export default async function AboutPage() {
             <ButtonLink href={getString(clientExperience.primaryCtaHref, "/schedule")}>
               {getString(clientExperience.primaryCtaLabel, "Plan Your Future")}
             </ButtonLink>
+          </div>
+        </div>
+      </section>
+      <section className="section-space px-4 sm:px-6 lg:px-10">
+        <div className="container-shell">
+          {testimonials.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((testimonial) => (
+                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              ))}
+            </div>
+          ) : null}
+          <div className={`grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start ${testimonials.length > 0 ? "mt-14" : ""}`}>
+            <SectionHeading
+              eyebrow="SHARE YOUR EXPERIENCE"
+              title="Tell us how working with Pinnacle felt."
+              description="Your feedback helps us keep improving. Submissions are reviewed by our team before appearing publicly on this page."
+            />
+            <TestimonialForm />
           </div>
         </div>
       </section>

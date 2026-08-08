@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { buildMetadata } from "@/lib/metadata";
-import { formatSectionLabel, getObject, getPublicPage, getString, getStringArray } from "@/lib/public-content";
+import { formatSectionLabel, getObject, getPublicPage, getPublicSeo, getString, getStringArray } from "@/lib/public-content";
 
 import { FadeUp } from "@/components/animations/motion";
+import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
@@ -47,13 +48,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getPublicPage(slug).catch(() => null);
+  const [page, seo] = await Promise.all([getPublicPage(slug).catch(() => null), getPublicSeo("PAGE", slug)]);
   const hero = getObject(page?.contentJson).hero;
   const heroContent = getObject(hero);
 
   return buildMetadata(
     page?.title ?? formatSectionLabel(slug),
     getString(heroContent.description, page?.summary ?? undefined),
+    { path: `/${slug}`, seo },
   );
 }
 
@@ -63,7 +65,7 @@ export default async function DynamicCmsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getPublicPage(slug).catch(() => null);
+  const [page, seo] = await Promise.all([getPublicPage(slug).catch(() => null), getPublicSeo("PAGE", slug)]);
 
   if (!page) notFound();
 
@@ -73,6 +75,7 @@ export default async function DynamicCmsPage({
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, page.title.toUpperCase())}
         title={getString(hero.title, page.title)}

@@ -1,24 +1,31 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicPage, getString } from "@/lib/public-content";
+import { getObject, getPublicPage, getPublicSeo, getString } from "@/lib/public-content";
 
 import { contactDetails } from "@/constants/contact";
+import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ScheduleForm } from "@/components/website/schedule-form";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata(
-  "Schedule Consultation",
-  "Request a consultation with Pinnacle Finance Advisors and start a more personalized planning conversation.",
-);
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "schedule");
+
+  return buildMetadata(
+    "Schedule Consultation",
+    "Request a consultation with Pinnacle Finance Advisors and start a more personalized planning conversation.",
+    { path: "/schedule", seo },
+  );
+}
 
 export default async function SchedulePage() {
-  const page = await getPublicPage("schedule");
+  const [page, seo] = await Promise.all([getPublicPage("schedule"), getPublicSeo("PAGE", "schedule")]);
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
   const expectations = getObject(content.expectations);
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, "SCHEDULE CONSULTATION")}
         title={getString(hero.title, "Reserve time for a conversation designed around your goals.")}

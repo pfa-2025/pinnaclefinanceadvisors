@@ -16,10 +16,11 @@ export function formatArrayInput(values: string[]) {
 }
 
 export function parseArrayInput(value: string) {
-  return value
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return value.split("\n");
+}
+
+export function sanitizeArrayInput(values: string[]) {
+  return values.map((item) => item.trim()).filter(Boolean);
 }
 
 export function formatJsonInput(value: unknown) {
@@ -28,6 +29,22 @@ export function formatJsonInput(value: unknown) {
 
 export function parseJsonInput(value: string) {
   return JSON.parse(value);
+}
+
+export function normalizeImageUrl(value: string) {
+  const trimmed = value.trim();
+
+  const driveFileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (driveFileMatch) {
+    return `https://drive.google.com/uc?export=view&id=${driveFileMatch[1]}`;
+  }
+
+  const driveOpenMatch = trimmed.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (driveOpenMatch) {
+    return `https://drive.google.com/uc?export=view&id=${driveOpenMatch[1]}`;
+  }
+
+  return trimmed;
 }
 
 export function getInitials(name?: string | null, fallback = "AD") {

@@ -1,10 +1,14 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicPage, getString, getStringArray } from "@/lib/public-content";
+import { getObject, getPublicPage, getPublicSeo, getString, getStringArray } from "@/lib/public-content";
 
 import { FadeUp } from "@/components/animations/motion";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata("Terms & Conditions");
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "terms");
+
+  return buildMetadata("Terms & Conditions", undefined, { path: "/terms", seo });
+}
 
 export default async function TermsPage() {
   const page = await getPublicPage("terms");

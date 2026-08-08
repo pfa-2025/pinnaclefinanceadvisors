@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { adminGet, adminPatch } from "@/lib/admin-api";
+import { websiteNavigation } from "@/constants/navigation";
+import type { NavItem } from "@/types";
 
 import { ContentPanel } from "@/components/admin/content-panel";
 
@@ -26,6 +28,7 @@ type SettingsResponse = {
   country: string;
   footerDisclaimer: string;
   workflowSettings: WorkflowSettings | null;
+  navLinks?: NavItem[] | null;
 };
 
 type SettingsForm = {
@@ -42,6 +45,7 @@ type SettingsForm = {
   country: string;
   footerDisclaimer: string;
   workflowSettings: WorkflowSettings;
+  navLinks: NavItem[];
 };
 
 const defaultWorkflowSettings: WorkflowSettings = {
@@ -68,6 +72,7 @@ function mapSettingsToForm(settings: SettingsResponse): SettingsForm {
       ...defaultWorkflowSettings,
       ...(settings.workflowSettings ?? {}),
     },
+    navLinks: settings.navLinks && settings.navLinks.length > 0 ? settings.navLinks : websiteNavigation,
   };
 }
 
@@ -114,6 +119,44 @@ export default function AdminSettingsPage() {
     );
   }
 
+  function updateNavLink(index: number, field: keyof NavItem, value: string) {
+    setForm((current) =>
+      current
+        ? {
+            ...current,
+            navLinks: current.navLinks.map((link, linkIndex) =>
+              linkIndex === index ? { ...link, [field]: value } : link,
+            ),
+          }
+        : current,
+    );
+  }
+
+  function addNavLink() {
+    setForm((current) =>
+      current ? { ...current, navLinks: [...current.navLinks, { label: "", href: "" }] } : current,
+    );
+  }
+
+  function removeNavLink(index: number) {
+    setForm((current) =>
+      current ? { ...current, navLinks: current.navLinks.filter((_, linkIndex) => linkIndex !== index) } : current,
+    );
+  }
+
+  function moveNavLink(index: number, direction: -1 | 1) {
+    setForm((current) => {
+      if (!current) return current;
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= current.navLinks.length) return current;
+
+      const navLinks = [...current.navLinks];
+      const [moved] = navLinks.splice(index, 1);
+      navLinks.splice(targetIndex, 0, moved);
+      return { ...current, navLinks };
+    });
+  }
+
   async function handleSave() {
     if (!form) return;
 
@@ -136,6 +179,9 @@ export default function AdminSettingsPage() {
         country: form.country,
         footerDisclaimer: form.footerDisclaimer,
         workflowSettings: form.workflowSettings,
+        navLinks: form.navLinks
+          .map((link) => ({ label: link.label.trim(), href: link.href.trim() }))
+          .filter((link) => link.label && link.href),
       });
       setForm(mapSettingsToForm(updated));
       setMessage("Settings saved successfully.");
@@ -235,6 +281,83 @@ export default function AdminSettingsPage() {
               placeholder="Footer disclaimer"
             />
             <div className="space-y-3">
+              {message ? <p className="text-sm text-accent">{message}</p> : null}
+              {error ? <p className="text-sm text-red-500">{error}</p> : null}
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#008f8f] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {saving ? "Saving..." : "Save Settings"}
+              </button>
+            </div>
+          </div>
+        )}
+      </ContentPanel>
+      <ContentPanel
+        title="Navigation Menu"
+        description="Add, reorder, or remove the links shown in the site's top navigation bar."
+      >
+        {loading ? (
+          <p className="text-sm text-muted">Loading navigation menu...</p>
+        ) : !form ? (
+          <p className="text-sm text-red-500">{error ?? "Navigation menu is unavailable right now."}</p>
+        ) : (
+          <div className="space-y-3">
+            {form.navLinks.map((link, index) => (
+              <div key={index} className="flex items-center gap-2 rounded-4xl border border-line p-3">
+                <div className="grid flex-1 gap-2 sm:grid-cols-2">
+                  <input
+                    className={inputClassName}
+                    value={link.label}
+                    onChange={(event) => updateNavLink(index, "label", event.target.value)}
+                    placeholder="Label (e.g. Affiliation)"
+                  />
+                  <input
+                    className={inputClassName}
+                    value={link.href}
+                    onChange={(event) => updateNavLink(index, "href", event.target.value)}
+                    placeholder="Link (e.g. /affiliation)"
+                  />
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={index === 0}
+                    onClick={() => moveNavLink(index, -1)}
+                    className="rounded-full border border-line px-2.5 py-2 text-xs text-primary disabled:opacity-30"
+                    aria-label="Move up"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === form.navLinks.length - 1}
+                    onClick={() => moveNavLink(index, 1)}
+                    className="rounded-full border border-line px-2.5 py-2 text-xs text-primary disabled:opacity-30"
+                    aria-label="Move down"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeNavLink(index)}
+                    className="rounded-full border border-[#f1d0d0] px-3 py-2 text-xs text-[#b84e4e]"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addNavLink}
+              className="rounded-full border border-line px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-[#f4f8f8]"
+            >
+              + Add Menu Item
+            </button>
+            <div className="space-y-3 pt-2">
               {message ? <p className="text-sm text-accent">{message}</p> : null}
               {error ? <p className="text-sm text-red-500">{error}</p> : null}
               <button

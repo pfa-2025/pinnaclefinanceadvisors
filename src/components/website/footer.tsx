@@ -64,16 +64,18 @@ export async function Footer() {
             </a>
             <div className="pt-2">
               <p className="text-xs uppercase tracking-[0.22em] text-white/45">Social</p>
-              <div className="mt-2 space-y-2">
+              <div className="mt-3 flex gap-3">
                 {socialLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="block hover:text-white"
+                    aria-label={link.label}
+                    title={link.label}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/68 transition hover:border-white/40 hover:text-white"
                   >
-                    {link.label}
+                    <link.icon size={16} />
                   </a>
                 ))}
               </div>

@@ -1,4 +1,6 @@
-const items = [
+import { getStringArray } from "@/lib/public-content";
+
+const defaultItems = [
   "RETIREMENT PLANNING",
   "WEALTH MANAGEMENT",
   "INVESTMENT STRATEGY",
@@ -7,7 +9,8 @@ const items = [
   "LONG-TERM GROWTH",
 ];
 
-export function TrustMarquee() {
+export function TrustMarquee({ marquee = {} }: { marquee?: Record<string, unknown> }) {
+  const items = getStringArray(marquee.items).length > 0 ? getStringArray(marquee.items) : defaultItems;
   const content = [...items, ...items];
 
   return (

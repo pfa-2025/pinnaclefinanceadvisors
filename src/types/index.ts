@@ -43,6 +43,25 @@ export interface Stat {
   detail: string;
 }
 
+export interface GalleryItem {
+  id: string;
+  title?: string | null;
+  category?: string | null;
+  caption?: string | null;
+  mediaType: "IMAGE" | "VIDEO";
+  imageUrl?: string | null;
+  videoUrl?: string | null;
+}
+
+export interface Testimonial {
+  id: string;
+  clientName?: string | null;
+  clientTitle?: string | null;
+  clientImageUrl?: string | null;
+  quote: string;
+  featured: boolean;
+}
+
 export interface AdminNavItem {
   label: string;
   href: string;

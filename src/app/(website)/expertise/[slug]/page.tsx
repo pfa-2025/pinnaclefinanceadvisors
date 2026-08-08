@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { buildMetadata } from "@/lib/metadata";
-import { getPublicService } from "@/lib/public-content";
+import { buildMetadata, siteName, siteUrl } from "@/lib/metadata";
+import { getPublicSeo, getPublicService } from "@/lib/public-content";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { JsonLd } from "@/components/shared/json-ld";
 import { ContentImage } from "@/components/shared/content-image";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
@@ -14,11 +15,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = await getPublicService(slug).catch(() => null);
+  const [service, seo] = await Promise.all([
+    getPublicService(slug).catch(() => null),
+    getPublicSeo("SERVICE", slug),
+  ]);
 
   if (!service) return buildMetadata("Service");
 
-  return buildMetadata(service.title, service.description);
+  return buildMetadata(service.title, service.description, { path: `/expertise/${slug}`, seo });
 }
 
 export default async function ServiceDetailPage({
@@ -27,12 +31,24 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = await getPublicService(slug).catch(() => null);
+  const [service, seo] = await Promise.all([
+    getPublicService(slug).catch(() => null),
+    getPublicSeo("SERVICE", slug),
+  ]);
 
   if (!service) notFound();
 
+  const schema = seo?.schemaJson ?? {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.longDescription || service.description,
+    provider: { "@type": "FinancialService", name: siteName, url: siteUrl },
+  };
+
   return (
     <>
+      <JsonLd data={schema} />
       <PageHero
         eyebrow={`SERVICE ${service.index}`}
         title={service.title}

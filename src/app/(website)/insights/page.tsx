@@ -1,17 +1,27 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicInsights, getPublicPage, getString } from "@/lib/public-content";
+import { getObject, getPublicInsights, getPublicPage, getPublicSeo, getString } from "@/lib/public-content";
 
+import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { InsightCard } from "@/components/website/insight-card";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata(
-  "Insights",
-  "Explore editorial perspective on retirement, tax strategy, legacy planning, and long-term financial decision-making.",
-);
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "insights");
+
+  return buildMetadata(
+    "Insights",
+    "Explore editorial perspective on retirement, tax strategy, legacy planning, and long-term financial decision-making.",
+    { path: "/insights", seo },
+  );
+}
 
 export default async function InsightsPage() {
-  const [page, insights] = await Promise.all([getPublicPage("insights"), getPublicInsights()]);
+  const [page, insights, seo] = await Promise.all([
+    getPublicPage("insights"),
+    getPublicInsights(),
+    getPublicSeo("PAGE", "insights"),
+  ]);
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
   const editorial = getObject(content.editorial);
@@ -19,6 +29,7 @@ export default async function InsightsPage() {
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, "INSIGHTS")}
         title={getString(hero.title, "Perspective for what's next in your financial life.")}

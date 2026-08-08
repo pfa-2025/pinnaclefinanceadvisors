@@ -9,6 +9,7 @@ type TestimonialItem = {
   id: string;
   clientName?: string | null;
   clientTitle?: string | null;
+  clientImageUrl?: string | null;
   quote: string;
   sourceType: string;
   approvalStatus: string;
@@ -42,7 +43,7 @@ export default function AdminTestimonialsPage() {
         clientName: "",
         clientTitle: "",
         quote: "",
-        sourceType: "",
+        sourceType: "website",
         approvalStatus: "PENDING",
         featured: false,
       })}
@@ -51,7 +52,7 @@ export default function AdminTestimonialsPage() {
         { name: "clientTitle", label: "Client Title", type: "text" },
         { name: "sourceType", label: "Source Type", type: "text" },
         { name: "approvalStatus", label: "Approval Status", type: "select", options: statusOptions },
-        { name: "quote", label: "Quote", type: "textarea", rows: 5 },
+        { name: "quote", label: "Feedback / Quote", type: "textarea", rows: 5 },
         { name: "featured", label: "Featured Testimonial", type: "checkbox" },
       ]}
       getItemId={(item) => item.id}

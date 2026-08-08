@@ -2,8 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { adminDelete, adminGet, adminPatch, adminPost } from "@/lib/admin-api";
-import { formatAdminDate, formatArrayInput, formatJsonInput, parseArrayInput, parseJsonInput } from "@/lib/admin-format";
+import { adminDelete, adminGet, adminPatch, adminPost, adminUpload } from "@/lib/admin-api";
+import {
+  formatAdminDate,
+  formatArrayInput,
+  formatJsonInput,
+  normalizeImageUrl,
+  parseArrayInput,
+  parseJsonInput,
+  sanitizeArrayInput,
+} from "@/lib/admin-format";
 
 import { ContentPanel } from "@/components/admin/content-panel";
 import { type AdminTableRow, DataTable } from "@/components/admin/data-table";
@@ -16,11 +24,13 @@ type Option = {
 type FieldConfig<TForm, TExtra> = {
   name: keyof TForm & string;
   label: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "array" | "json" | "number" | "date";
+  type: "text" | "textarea" | "select" | "checkbox" | "array" | "json" | "number" | "date" | "image";
   placeholder?: string;
   readOnly?: boolean;
   rows?: number;
   options?: Option[] | ((extra: TExtra | null) => Option[]);
+  uploadEndpoint?: string;
+  showIf?: (form: TForm) => boolean;
 };
 
 type AdminEntityPageProps<TItem, TForm extends Record<string, unknown>, TExtra = unknown> = {
@@ -87,6 +97,7 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const rows = useMemo(() => items.map(mapItemToRow), [items, mapItemToRow]);
   const selectedItem = useMemo(
@@ -155,6 +166,24 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
     setForm((current) => (current ? { ...current, [name]: value } : current));
   }
 
+  async function handleImageUpload(field: FieldConfig<TForm, TExtra>, file: File) {
+    if (!field.uploadEndpoint) return;
+
+    setUploadingField(field.name);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await adminUpload<{ url: string }>(field.uploadEndpoint, formData);
+      updateFormField(field.name, result.url);
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Image upload failed.");
+    } finally {
+      setUploadingField(null);
+    }
+  }
+
   async function handleSave(publish = false) {
     if (!form) return;
 
@@ -163,23 +192,32 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
     setMessage(null);
 
     try {
+      const sanitizedForm = { ...form };
+      for (const field of fields) {
+        if (field.type === "array" && Array.isArray(sanitizedForm[field.name])) {
+          (sanitizedForm as Record<string, unknown>)[field.name] = sanitizeArrayInput(
+            sanitizedForm[field.name] as string[],
+          );
+        }
+      }
+
       let refreshedId = selectedId;
 
       if (selectedItem) {
-        const path = getUpdatePath?.(selectedItem, form) ?? `${endpoint}/${getItemId(selectedItem)}`;
-        await adminPatch(path, mapFormToPayload(form, extra));
+        const path = getUpdatePath?.(selectedItem, sanitizedForm) ?? `${endpoint}/${getItemId(selectedItem)}`;
+        await adminPatch(path, mapFormToPayload(sanitizedForm, extra));
 
         if (publish && publishAction) {
-          await publishAction.run(selectedItem, form);
+          await publishAction.run(selectedItem, sanitizedForm);
         }
 
         refreshedId = getItemId(selectedItem);
       } else {
-        const path = getCreatePath?.(form) ?? endpoint;
+        const path = getCreatePath?.(sanitizedForm) ?? endpoint;
         const created =
           createMethod === "PATCH"
-            ? await adminPatch<TItem>(path, mapFormToPayload(form, extra))
-            : await adminPost<TItem>(path, mapFormToPayload(form, extra));
+            ? await adminPatch<TItem>(path, mapFormToPayload(sanitizedForm, extra))
+            : await adminPost<TItem>(path, mapFormToPayload(sanitizedForm, extra));
 
         refreshedId = getItemId(created);
       }
@@ -233,6 +271,10 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
         ) : (
           <div className="space-y-4">
             {fields.map((field) => {
+              if (field.showIf && !field.showIf(form)) {
+                return null;
+              }
+
               const value = form[field.name];
               const options = typeof field.options === "function" ? field.options(extra) : field.options ?? [];
 
@@ -301,6 +343,51 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
                       placeholder={field.placeholder ?? "One item per line"}
                     />
                   </label>
+                );
+              }
+
+              if (field.type === "image") {
+                const stringValue = typeof value === "string" ? value : "";
+                const isUploading = uploadingField === field.name;
+
+                return (
+                  <div key={field.name} className="space-y-3">
+                    <span className="mb-2 block text-sm font-medium text-primary">{field.label}</span>
+                    {stringValue ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={stringValue}
+                        alt=""
+                        className="h-24 w-24 rounded-2xl border border-line object-cover"
+                      />
+                    ) : null}
+                    <input
+                      type="text"
+                      value={stringValue}
+                      readOnly={field.readOnly}
+                      onChange={(event) => updateFormField(field.name, normalizeImageUrl(event.target.value))}
+                      className={inputClassName}
+                      placeholder={field.placeholder ?? "Paste an image URL or public Google Drive link"}
+                    />
+                    {field.uploadEndpoint ? (
+                      <label className="inline-flex cursor-pointer items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={isUploading}
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.target.value = "";
+                            if (file) void handleImageUpload(field, file);
+                          }}
+                        />
+                        <span className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">
+                          {isUploading ? "Uploading..." : "Upload Image"}
+                        </span>
+                      </label>
+                    ) : null}
+                  </div>
                 );
               }
 

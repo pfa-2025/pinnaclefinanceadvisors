@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { buildMetadata } from "@/lib/metadata";
-import { getPublicAdvisor } from "@/lib/public-content";
+import { buildMetadata, siteName, siteUrl } from "@/lib/metadata";
+import { getPublicAdvisor, getPublicSeo } from "@/lib/public-content";
 
 import { FadeUp, ImageReveal } from "@/components/animations/motion";
+import { JsonLd } from "@/components/shared/json-ld";
 import { ContentImage } from "@/components/shared/content-image";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
@@ -14,9 +15,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const advisor = await getPublicAdvisor(slug).catch(() => null);
+  const [advisor, seo] = await Promise.all([
+    getPublicAdvisor(slug).catch(() => null),
+    getPublicSeo("ADVISOR", slug),
+  ]);
 
-  return buildMetadata(advisor?.name ?? "Advisor", advisor?.bio);
+  return buildMetadata(advisor?.name ?? "Advisor", advisor?.bio, { path: `/advisors/${slug}`, seo });
 }
 
 export default async function AdvisorProfilePage({
@@ -25,12 +29,28 @@ export default async function AdvisorProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const advisor = await getPublicAdvisor(slug).catch(() => null);
+  const [advisor, seo] = await Promise.all([
+    getPublicAdvisor(slug).catch(() => null),
+    getPublicSeo("ADVISOR", slug),
+  ]);
 
   if (!advisor) notFound();
 
+  const schema = seo?.schemaJson ?? {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: advisor.name,
+    jobTitle: advisor.role,
+    description: advisor.bio,
+    image: advisor.image,
+    email: advisor.email,
+    telephone: advisor.phone,
+    worksFor: { "@type": "FinancialService", name: siteName, url: siteUrl },
+  };
+
   return (
     <>
+      <JsonLd data={schema} />
       <PageHero
         eyebrow="ADVISOR PROFILE"
         title={advisor.name}

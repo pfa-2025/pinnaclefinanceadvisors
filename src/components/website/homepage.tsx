@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { getObject, getString, getStringArray } from "@/lib/public-content";
 import { cn } from "@/lib/utils";
-import type { Advisor, Insight, Service, Stat } from "@/types";
+import type { Advisor, GalleryItem, Insight, Service, Stat } from "@/types";
 
 import {
   FadeIn,
@@ -19,6 +19,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { AdvisorCard } from "@/components/website/advisor-card";
 import { AnimatedNumber } from "@/components/website/animated-number";
+import { GallerySection } from "@/components/website/gallery-section";
 import { InsightCard } from "@/components/website/insight-card";
 import { LineGraph } from "@/components/website/line-graph";
 import { ServiceShowcase } from "@/components/website/service-showcase";
@@ -26,18 +27,21 @@ import { TrustMarquee } from "@/components/website/trust-marquee";
 
 export function Homepage({
   advisors,
+  galleryItems,
   homepageStats,
   insights,
   page,
   services,
 }: {
   advisors: Advisor[];
+  galleryItems: GalleryItem[];
   homepageStats: Stat[];
   insights: Insight[];
   page?: Record<string, unknown>;
   services: Service[];
 }) {
   const hero = getObject(page?.hero);
+  const marquee = getObject(page?.marquee);
   const introduction = getObject(page?.introduction);
   const about = getObject(page?.about);
   const servicesContent = getObject(page?.services);
@@ -45,13 +49,14 @@ export function Homepage({
   const whyPinnacle = getObject(page?.whyPinnacle);
   const advisorsContent = getObject(page?.advisors);
   const journey = getObject(page?.journey);
+  const galleryContent = getObject(page?.gallery);
   const insightsContent = getObject(page?.insights);
   const finalCta = getObject(page?.finalCta);
 
   return (
     <>
       <HeroSection hero={hero} />
-      <TrustMarquee />
+      <TrustMarquee marquee={marquee} />
       <IntroductionSection introduction={introduction} />
       <AboutExperienceSection about={about} />
       <ServicesSection services={services} servicesContent={servicesContent} />
@@ -60,6 +65,7 @@ export function Homepage({
       <WhyPinnacleSection whyPinnacle={whyPinnacle} />
       <AdvisorsSection advisors={advisors} advisorsContent={advisorsContent} />
       <JourneySection journey={journey} />
+      <GallerySection items={galleryItems} content={galleryContent} />
       <InsightsSection insights={insights} insightsContent={insightsContent} />
       <FinalCtaSection finalCta={finalCta} />
     </>

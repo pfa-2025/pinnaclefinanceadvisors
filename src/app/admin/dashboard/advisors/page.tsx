@@ -64,7 +64,13 @@ export default function AdminAdvisorsPage() {
         { name: "bio", label: "Biography", type: "textarea", rows: 5 },
         { name: "email", label: "Email", type: "text" },
         { name: "phone", label: "Phone", type: "text" },
-        { name: "portraitImageUrl", label: "Portrait URL", type: "text" },
+        {
+          name: "portraitImageUrl",
+          label: "Portrait Image",
+          type: "image",
+          uploadEndpoint: "/admin/advisors/portrait",
+          placeholder: "Paste an image URL or public Google Drive link, or upload a file below",
+        },
         { name: "specializations", label: "Specializations", type: "array" },
       ]}
       getItemId={(item) => item.id}

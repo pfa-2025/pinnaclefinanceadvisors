@@ -1,10 +1,14 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicPage, getString, getStringArray } from "@/lib/public-content";
+import { getObject, getPublicPage, getPublicSeo, getString, getStringArray } from "@/lib/public-content";
 
 import { FadeUp } from "@/components/animations/motion";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata("Privacy Policy");
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "privacy");
+
+  return buildMetadata("Privacy Policy", undefined, { path: "/privacy", seo });
+}
 
 export default async function PrivacyPage() {
   const page = await getPublicPage("privacy");

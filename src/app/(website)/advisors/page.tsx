@@ -1,24 +1,35 @@
 import { buildMetadata } from "@/lib/metadata";
-import { getObject, getPublicAdvisors, getPublicPage, getString } from "@/lib/public-content";
+import { getObject, getPublicAdvisors, getPublicPage, getPublicSeo, getString } from "@/lib/public-content";
 import { cn } from "@/lib/utils";
 
+import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { AdvisorCard } from "@/components/website/advisor-card";
 import { PageHero } from "@/components/website/page-hero";
 
-export const metadata = buildMetadata(
-  "Advisors",
-  "Meet the Pinnacle Finance Advisors team and explore the specialties behind our client relationships.",
-);
+export async function generateMetadata() {
+  const seo = await getPublicSeo("PAGE", "advisors");
+
+  return buildMetadata(
+    "Advisors",
+    "Meet the Pinnacle Finance Advisors team and explore the specialties behind our client relationships.",
+    { path: "/advisors", seo },
+  );
+}
 
 export default async function AdvisorsPage() {
-  const [page, advisors] = await Promise.all([getPublicPage("advisors"), getPublicAdvisors()]);
+  const [page, advisors, seo] = await Promise.all([
+    getPublicPage("advisors"),
+    getPublicAdvisors(),
+    getPublicSeo("PAGE", "advisors"),
+  ]);
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
   const spotlight = getObject(content.spotlight);
 
   return (
     <>
+      {seo?.schemaJson ? <JsonLd data={seo.schemaJson} /> : null}
       <PageHero
         eyebrow={getString(hero.eyebrow, "MEET THE TEAM")}
         title={getString(hero.title, "Trusted advisors with strategic depth and a personal way of working.")}
