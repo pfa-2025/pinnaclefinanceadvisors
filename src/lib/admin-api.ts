@@ -25,6 +25,12 @@ export function clearAdminSession() {
   window.localStorage.removeItem(userKey);
 }
 
+function redirectToLogin() {
+  if (typeof window === "undefined") return;
+  const next = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.assign(`/admin/login?next=${next}`);
+}
+
 export function setAdminUser(user: unknown) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(userKey, JSON.stringify(user));
@@ -84,6 +90,7 @@ async function requestWithAuth<T>(path: string, init?: RequestInit, retry = true
       return requestWithAuth<T>(path, init, false);
     } catch {
       clearAdminSession();
+      redirectToLogin();
       throw new Error("Your admin session has expired. Please sign in again.");
     }
   }
@@ -140,6 +147,7 @@ export async function adminUpload<T>(path: string, formData: FormData) {
       return adminUpload<T>(path, formData);
     } catch {
       clearAdminSession();
+      redirectToLogin();
       throw new Error("Your admin session has expired. Please sign in again.");
     }
   }
