@@ -18,8 +18,7 @@ export function PageHero({
 }) {
   return (
     <section
-      style={{ paddingTop: "calc(9rem + var(--announcement-h, 0px))" }}
-      className="relative overflow-hidden bg-primary px-4 pb-16 text-white sm:px-6 lg:px-10"
+      className="relative overflow-hidden bg-primary px-4 pb-16 pt-36 text-white sm:px-6 lg:px-10"
     >
       <div className="absolute inset-0 bg-hero-radial opacity-90" />
       <div className="absolute inset-0 bg-grid bg-[size:72px_72px] opacity-[0.06]" />

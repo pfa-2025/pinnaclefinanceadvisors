@@ -299,11 +299,6 @@ export async function getPublicAffiliateOffers(): Promise<PublicAffiliateOffer[]
   }
 }
 
-export function pickRandomAffiliateOffer(offers: PublicAffiliateOffer[]): PublicAffiliateOffer | null {
-  if (offers.length === 0) return null;
-  return offers[Math.floor(Math.random() * offers.length)];
-}
-
 export async function getPublicSitemap() {
   const entries = await fetchPublic<SitemapEntry[]>("/public/sitemap");
   return entries.map((entry) => ({

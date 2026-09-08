@@ -12,8 +12,10 @@ import {
   type PublicAffiliateOffer,
 } from "@/lib/public-content";
 import { buildMetadata } from "@/lib/metadata";
+import { getWebsitePreviewUrl } from "@/lib/website-preview";
 
 import { FadeUp } from "@/components/animations/motion";
+import { ContentImage } from "@/components/shared/content-image";
 import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ButtonLink } from "@/components/ui/button";
@@ -48,31 +50,42 @@ function AffiliateOffersSection({ offers }: { offers: PublicAffiliateOffer[] }) 
         description="Coupon codes currently available through our affiliate partners."
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        {offers.map((offer) => (
-          <FadeUp
-            key={offer.id}
-            className="space-y-3 rounded-4xl border border-line bg-white/70 px-5 py-5 shadow-soft"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-primary">{offer.brandName}</p>
-              <span className="rounded-full bg-primary/6 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-primary">
-                {offer.couponCode}
-              </span>
-            </div>
-            <p className="text-sm leading-6 text-muted">{offer.message}</p>
-            {offer.brandUrl ? (
-              <a
-                href={offer.brandUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:underline"
-              >
-                Visit {offer.brandName}
-                <ArrowUpRight size={14} />
-              </a>
-            ) : null}
-          </FadeUp>
-        ))}
+        {offers.map((offer) => {
+          const previewUrl = offer.brandUrl ? getWebsitePreviewUrl(offer.brandUrl) : null;
+
+          return (
+            <FadeUp
+              key={offer.id}
+              className="overflow-hidden rounded-4xl border border-line bg-white/70 shadow-soft"
+            >
+              {previewUrl ? (
+                <div className="aspect-video w-full overflow-hidden bg-primary/5">
+                  <ContentImage src={previewUrl} alt={`${offer.brandName} website preview`} />
+                </div>
+              ) : null}
+              <div className="space-y-3 px-5 py-5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-primary">{offer.brandName}</p>
+                  <span className="rounded-full bg-primary/6 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-primary">
+                    {offer.couponCode}
+                  </span>
+                </div>
+                <p className="text-sm leading-6 text-muted">{offer.message}</p>
+                {offer.brandUrl ? (
+                  <a
+                    href={offer.brandUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:underline"
+                  >
+                    Visit {offer.brandName}
+                    <ArrowUpRight size={14} />
+                  </a>
+                ) : null}
+              </div>
+            </FadeUp>
+          );
+        })}
       </div>
     </div>
   );
