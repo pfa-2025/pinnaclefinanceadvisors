@@ -12,6 +12,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Ticket,
   Users,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ export const adminNavigation: AdminNavItem[] = [
   { label: "Gallery", href: "/admin/dashboard/gallery", icon: GalleryHorizontalEnd },
   { label: "Categories", href: "/admin/dashboard/categories", icon: FolderKanban },
   { label: "Testimonials", href: "/admin/dashboard/testimonials", icon: MessageSquareQuote },
+  { label: "Affiliate Offers", href: "/admin/dashboard/affiliate-offers", icon: Ticket },
   { label: "Enquiries", href: "/admin/dashboard/enquiries", icon: Search },
   { label: "Consultations", href: "/admin/dashboard/consultations", icon: CalendarRange },
   { label: "Media", href: "/admin/dashboard/media", icon: ImageIcon },

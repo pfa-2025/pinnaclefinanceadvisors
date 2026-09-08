@@ -54,10 +54,15 @@ type AdminEntityPageProps<TItem, TForm extends Record<string, unknown>, TExtra =
   publishAction?: {
     label: string;
     run: (item: TItem, form: TForm) => Promise<unknown>;
+    /** Returns true once the item is already in the state this action would put it in. */
+    isDone?: (item: TItem) => boolean;
+    doneLabel?: string;
+    pendingLabel?: string;
   };
   deleteAction?: {
     label: string;
     run: (item: TItem) => Promise<unknown>;
+    pendingLabel?: string;
   };
 };
 
@@ -94,10 +99,12 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<TForm | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [activeAction, setActiveAction] = useState<"save" | "publish" | "delete" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const saving = activeAction !== null;
+  const busy = saving || uploadingField !== null;
 
   const rows = useMemo(() => items.map(mapItemToRow), [items, mapItemToRow]);
   const selectedItem = useMemo(
@@ -187,7 +194,7 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
   async function handleSave(publish = false) {
     if (!form) return;
 
-    setSaving(true);
+    setActiveAction(publish ? "publish" : "save");
     setError(null);
     setMessage(null);
 
@@ -227,14 +234,14 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Unable to save changes.");
     } finally {
-      setSaving(false);
+      setActiveAction(null);
     }
   }
 
   async function handleDelete() {
     if (!selectedItem) return;
 
-    setSaving(true);
+    setActiveAction("delete");
     setError(null);
     setMessage(null);
 
@@ -250,7 +257,7 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "Unable to delete this entry.");
     } finally {
-      setSaving(false);
+      setActiveAction(null);
     }
   }
 
@@ -370,11 +377,15 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
                       placeholder={field.placeholder ?? "Paste an image URL or public Google Drive link"}
                     />
                     {field.uploadEndpoint ? (
-                      <label className="inline-flex cursor-pointer items-center gap-2">
+                      <label
+                        className={`inline-flex items-center gap-2 ${
+                          isUploading || saving ? "cursor-not-allowed" : "cursor-pointer"
+                        }`}
+                      >
                         <input
                           type="file"
                           accept="image/*"
-                          disabled={isUploading}
+                          disabled={isUploading || saving}
                           className="hidden"
                           onChange={(event) => {
                             const file = event.target.files?.[0];
@@ -382,7 +393,11 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
                             if (file) void handleImageUpload(field, file);
                           }}
                         />
-                        <span className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">
+                        <span
+                          className={`rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white ${
+                            isUploading || saving ? "opacity-50" : ""
+                          }`}
+                        >
                           {isUploading ? "Uploading..." : "Upload Image"}
                         </span>
                       </label>
@@ -446,30 +461,41 @@ export function AdminEntityPage<TItem, TForm extends Record<string, unknown>, TE
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                disabled={saving}
+                disabled={busy}
                 onClick={() => void handleSave(false)}
-                className="rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white"
+                className="rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {saving ? "Saving..." : "Save Draft"}
+                {activeAction === "save" ? "Saving..." : "Save Draft"}
               </button>
               {publishAction ? (
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={() => void handleSave(true)}
-                  className="rounded-full border border-line px-4 py-3 text-sm text-primary"
-                >
-                  {publishAction.label}
-                </button>
+                (() => {
+                  const isDone = selectedItem ? (publishAction.isDone?.(selectedItem) ?? false) : false;
+                  return (
+                    <button
+                      type="button"
+                      disabled={busy || isDone}
+                      onClick={() => void handleSave(true)}
+                      className="rounded-full border border-line px-4 py-3 text-sm text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isDone
+                        ? (publishAction.doneLabel ?? "Published")
+                        : activeAction === "publish"
+                          ? (publishAction.pendingLabel ?? "Publishing...")
+                          : publishAction.label}
+                    </button>
+                  );
+                })()
               ) : null}
               {selectedItem && showDeleteAction ? (
                 <button
                   type="button"
-                  disabled={saving}
+                  disabled={busy}
                   onClick={() => void handleDelete()}
-                  className="rounded-full border border-[#f1d0d0] px-4 py-3 text-sm text-[#b84e4e]"
+                  className="rounded-full border border-[#f1d0d0] px-4 py-3 text-sm text-[#b84e4e] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {deleteAction?.label ?? "Archive"}
+                  {activeAction === "delete"
+                    ? (deleteAction?.pendingLabel ?? "Archiving...")
+                    : (deleteAction?.label ?? "Archive")}
                 </button>
               ) : null}
             </div>

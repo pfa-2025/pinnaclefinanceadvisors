@@ -106,6 +106,8 @@ export default function AdminAdvisorsPage() {
       publishAction={{
         label: "Publish",
         run: (item) => adminPost(`/admin/advisors/${item.id}/publish`, {}),
+        isDone: (item) => item.status === "PUBLISHED",
+        doneLabel: "Published",
       }}
       showDeleteAction
     />

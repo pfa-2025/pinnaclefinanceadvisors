@@ -1,13 +1,82 @@
+import { ArrowUpRight } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import {
+  formatSectionLabel,
+  getObject,
+  getPublicAffiliateOffers,
+  getPublicPage,
+  getPublicSeo,
+  getString,
+  getStringArray,
+  type PublicAffiliateOffer,
+} from "@/lib/public-content";
 import { buildMetadata } from "@/lib/metadata";
-import { formatSectionLabel, getObject, getPublicPage, getPublicSeo, getString, getStringArray } from "@/lib/public-content";
 
 import { FadeUp } from "@/components/animations/motion";
 import { JsonLd } from "@/components/shared/json-ld";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHero } from "@/components/website/page-hero";
+
+function SectionBlock({ sectionKey, value }: { sectionKey: string; value: unknown }) {
+  const section = getObject(value);
+  const primaryCtaLabel = getString(section.primaryCtaLabel);
+  const primaryCtaHref = getString(section.primaryCtaHref);
+
+  return (
+    <div className="space-y-6">
+      <SectionHeading
+        eyebrow={getString(section.eyebrow, formatSectionLabel(sectionKey).toUpperCase())}
+        title={getString(section.title, formatSectionLabel(sectionKey))}
+        description={getString(section.description)}
+      />
+      {renderSectionContent(section)}
+      {primaryCtaLabel && primaryCtaHref ? <ButtonLink href={primaryCtaHref}>{primaryCtaLabel}</ButtonLink> : null}
+    </div>
+  );
+}
+
+function AffiliateOffersSection({ offers }: { offers: PublicAffiliateOffer[] }) {
+  if (offers.length === 0) return null;
+
+  return (
+    <div className="space-y-6">
+      <SectionHeading
+        eyebrow="CURRENT OFFERS"
+        title="Active partner offers."
+        description="Coupon codes currently available through our affiliate partners."
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        {offers.map((offer) => (
+          <FadeUp
+            key={offer.id}
+            className="space-y-3 rounded-4xl border border-line bg-white/70 px-5 py-5 shadow-soft"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-primary">{offer.brandName}</p>
+              <span className="rounded-full bg-primary/6 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-primary">
+                {offer.couponCode}
+              </span>
+            </div>
+            <p className="text-sm leading-6 text-muted">{offer.message}</p>
+            {offer.brandUrl ? (
+              <a
+                href={offer.brandUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:underline"
+              >
+                Visit {offer.brandName}
+                <ArrowUpRight size={14} />
+              </a>
+            ) : null}
+          </FadeUp>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function renderSectionContent(section: Record<string, unknown>) {
   const textEntries = Object.entries(section).filter(
@@ -65,13 +134,19 @@ export default async function DynamicCmsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [page, seo] = await Promise.all([getPublicPage(slug).catch(() => null), getPublicSeo("PAGE", slug)]);
+  const [page, seo, affiliateOffers] = await Promise.all([
+    getPublicPage(slug).catch(() => null),
+    getPublicSeo("PAGE", slug),
+    slug === "affiliation" ? getPublicAffiliateOffers() : Promise.resolve([]),
+  ]);
 
   if (!page) notFound();
 
   const content = getObject(page.contentJson);
   const hero = getObject(content.hero);
-  const sections = Object.entries(content).filter(([key]) => key !== "hero");
+  const isAffiliationPage = slug === "affiliation";
+  const sections = Object.entries(content).filter(([key]) => key !== "hero" && !(isAffiliationPage && key === "cta"));
+  const ctaSection = isAffiliationPage && content.cta ? (["cta", content.cta] as const) : null;
 
   return (
     <>
@@ -84,31 +159,15 @@ export default async function DynamicCmsPage({
       />
       <section className="section-space px-4 sm:px-6 lg:px-10">
         <div className="container-shell max-w-5xl space-y-12">
-          {sections.length === 0 ? (
+          {sections.length === 0 && !isAffiliationPage ? (
             <FadeUp>
               <p className="text-base leading-8 text-muted">{page.summary ?? "This page has been published and is ready for content."}</p>
             </FadeUp>
           ) : (
-            sections.map(([key, value]) => {
-              const section = getObject(value);
-              const primaryCtaLabel = getString(section.primaryCtaLabel);
-              const primaryCtaHref = getString(section.primaryCtaHref);
-
-              return (
-                <div key={key} className="space-y-6">
-                  <SectionHeading
-                    eyebrow={getString(section.eyebrow, formatSectionLabel(key).toUpperCase())}
-                    title={getString(section.title, formatSectionLabel(key))}
-                    description={getString(section.description)}
-                  />
-                  {renderSectionContent(section)}
-                  {primaryCtaLabel && primaryCtaHref ? (
-                    <ButtonLink href={primaryCtaHref}>{primaryCtaLabel}</ButtonLink>
-                  ) : null}
-                </div>
-              );
-            })
+            sections.map(([key, value]) => <SectionBlock key={key} sectionKey={key} value={value} />)
           )}
+          {isAffiliationPage ? <AffiliateOffersSection offers={affiliateOffers} /> : null}
+          {ctaSection ? <SectionBlock sectionKey={ctaSection[0]} value={ctaSection[1]} /> : null}
         </div>
       </section>
     </>

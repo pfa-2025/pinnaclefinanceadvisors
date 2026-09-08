@@ -117,6 +117,8 @@ export default function AdminGalleryPage() {
       publishAction={{
         label: "Publish",
         run: (item) => adminPost(`/admin/gallery/${item.id}/publish`, {}),
+        isDone: (item) => item.status === "PUBLISHED",
+        doneLabel: "Published",
       }}
       showDeleteAction
     />

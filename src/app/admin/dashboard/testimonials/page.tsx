@@ -82,6 +82,8 @@ export default function AdminTestimonialsPage() {
       publishAction={{
         label: "Approve",
         run: (item, form) => adminPost(`/admin/testimonials/${item.id}/approve`, { featured: form.featured }),
+        isDone: (item) => item.approvalStatus === "APPROVED",
+        doneLabel: "Approved",
       }}
     />
   );

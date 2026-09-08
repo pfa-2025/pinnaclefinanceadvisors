@@ -29,7 +29,8 @@ export function Navbar({ navLinks }: { navLinks: NavItem[] }) {
         initial={reduceMotion ? false : { y: -36, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8"
+        style={{ top: "var(--announcement-h, 0px)" }}
+        className="fixed inset-x-0 z-50 px-4 pt-4 transition-[top] duration-300 sm:px-6 lg:px-8"
       >
         <div
           className={cn(

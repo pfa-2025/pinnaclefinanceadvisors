@@ -102,6 +102,25 @@ type PublicTestimonialRecord = {
   featured: boolean;
 };
 
+export type PublicAffiliateOffer = {
+  id: string;
+  brandName: string;
+  brandUrl?: string | null;
+  message: string;
+  couponCode: string;
+};
+
+/**
+ * Uploads made before the site moved to R2 were served from the backend's own
+ * `/uploads/*` route, backed by local/ephemeral disk. Those URLs can 404 at any time
+ * (a redeploy wipes them), so treat them as absent and fall back rather than render
+ * a broken image. New uploads go straight to R2 and never match this.
+ */
+function sanitizeImageUrl<T extends string | null | undefined>(url: T): T | null {
+  if (typeof url === "string" && url.includes("/uploads/")) return null;
+  return url;
+}
+
 const fallbackImages = {
   advisor:
     "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80",
@@ -143,7 +162,7 @@ function mapService(item: PublicServiceRecord, index: number): Service & { longD
     description: item.shortDescription,
     longDescription: item.longDescription,
     benefits: item.benefits.map((benefit) => benefit.label),
-    image: item.coverImageUrl || fallbackImages.service,
+    image: sanitizeImageUrl(item.coverImageUrl) || fallbackImages.service,
     metric: item.metricLabel,
   };
 }
@@ -155,7 +174,7 @@ function mapAdvisor(item: PublicAdvisorRecord): Advisor {
     role: item.roleTitle,
     bio: item.bio,
     specializations: item.specializations.map((entry) => entry.label),
-    image: item.portraitImageUrl || fallbackImages.advisor,
+    image: sanitizeImageUrl(item.portraitImageUrl) || fallbackImages.advisor,
     email: item.email,
     phone: item.phone,
   };
@@ -168,7 +187,7 @@ function mapInsight(item: PublicInsightRecord): Insight {
     date: formatDisplayDate(item.publishedAt ?? item.createdAt) || "Unpublished",
     title: item.title,
     description: item.excerpt,
-    image: item.coverImageUrl || fallbackImages.insight,
+    image: sanitizeImageUrl(item.coverImageUrl) || fallbackImages.insight,
     body: Array.isArray(item.bodyJson) ? item.bodyJson : [],
   };
 }
@@ -249,7 +268,8 @@ export async function getPublicNavLinks(): Promise<NavItem[]> {
 
 export async function getPublicGallery(): Promise<GalleryItem[]> {
   try {
-    return await fetchPublic<PublicGalleryRecord[]>("/public/gallery");
+    const items = await fetchPublic<PublicGalleryRecord[]>("/public/gallery");
+    return items.map((item) => ({ ...item, imageUrl: sanitizeImageUrl(item.imageUrl) }));
   } catch {
     return [];
   }
@@ -262,13 +282,26 @@ export async function getPublicTestimonials(): Promise<Testimonial[]> {
       id: item.id,
       clientName: item.clientName,
       clientTitle: item.clientTitle,
-      clientImageUrl: item.clientImageUrl,
+      clientImageUrl: sanitizeImageUrl(item.clientImageUrl),
       quote: item.quote,
       featured: item.featured,
     }));
   } catch {
     return [];
   }
+}
+
+export async function getPublicAffiliateOffers(): Promise<PublicAffiliateOffer[]> {
+  try {
+    return await fetchPublic<PublicAffiliateOffer[]>("/public/affiliate-offers");
+  } catch {
+    return [];
+  }
+}
+
+export function pickRandomAffiliateOffer(offers: PublicAffiliateOffer[]): PublicAffiliateOffer | null {
+  if (offers.length === 0) return null;
+  return offers[Math.floor(Math.random() * offers.length)];
 }
 
 export async function getPublicSitemap() {

@@ -126,6 +126,8 @@ export default function AdminInsightsPage() {
       publishAction={{
         label: "Publish",
         run: (item) => adminPost(`/admin/insights/${item.id}/publish`, {}),
+        isDone: (item) => item.status === "PUBLISHED",
+        doneLabel: "Published",
       }}
       showDeleteAction
     />

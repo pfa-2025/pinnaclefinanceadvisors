@@ -6,8 +6,25 @@ const userKey = "pfa_admin_user";
 type ApiEnvelope<T> = {
   success?: boolean;
   data?: T;
-  error?: { message?: string };
+  error?: {
+    message?: string;
+    details?: {
+      fieldErrors?: Record<string, string[]>;
+      formErrors?: string[];
+    };
+  };
 };
+
+function describeError(error: ApiEnvelope<unknown>["error"]) {
+  const fieldErrors = error?.details?.fieldErrors ?? {};
+  const fieldMessages = Object.entries(fieldErrors)
+    .filter(([, messages]) => Array.isArray(messages) && messages.length > 0)
+    .map(([field, messages]) => `${field}: ${messages[0]}`);
+  const formMessages = error?.details?.formErrors ?? [];
+  const combined = [...fieldMessages, ...formMessages].join("; ");
+
+  return combined || error?.message || "Request failed";
+}
 
 export function getAdminAccessToken() {
   if (typeof window === "undefined") return null;
@@ -52,7 +69,7 @@ async function parseResponse<T>(response: Response) {
   const payload = (await response.json().catch(() => null)) as ApiEnvelope<T> | null;
 
   if (!response.ok || !payload?.success) {
-    throw new Error(payload?.error?.message ?? "Request failed");
+    throw new Error(describeError(payload?.error));
   }
 
   return payload.data as T;

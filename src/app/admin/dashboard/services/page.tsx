@@ -100,6 +100,8 @@ export default function AdminServicesPage() {
       publishAction={{
         label: "Publish",
         run: (item) => adminPost(`/admin/services/${item.id}/publish`, {}),
+        isDone: (item) => item.status === "PUBLISHED",
+        doneLabel: "Published",
       }}
       showDeleteAction
     />

@@ -74,7 +74,10 @@ export function Homepage({
 
 function HeroSection({ hero }: { hero: Record<string, unknown> }) {
   return (
-    <section className="relative overflow-hidden bg-primary px-4 pb-18 pt-34 text-white sm:px-6 lg:px-10">
+    <section
+      style={{ paddingTop: "calc(8.5rem + var(--announcement-h, 0px))" }}
+      className="relative overflow-hidden bg-primary px-4 pb-18 text-white sm:px-6 lg:px-10"
+    >
       <div className="absolute inset-0 bg-hero-radial" />
       <div className="absolute inset-0 bg-grid bg-[size:74px_74px] opacity-[0.07]" />
       <div className="container-shell relative grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">

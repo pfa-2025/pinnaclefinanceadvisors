@@ -8,7 +8,7 @@ export async function generateMetadata() {
   const seo = await getPublicSeo("PAGE", "home");
 
   return buildMetadata(
-    "Wealth Management & Financial Planning",
+    "Defensive; Financial Planning",
     "Premium financial guidance, wealth strategy, and long-term planning built around clarity, confidence, and deeply personal advisory relationships.",
     { path: "/", seo },
   );
