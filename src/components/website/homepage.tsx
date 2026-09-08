@@ -127,11 +127,15 @@ function HeroSection({ hero }: { hero: Record<string, unknown> }) {
           </ImageReveal>
 
           <ScaleReveal className="glass-panel absolute -left-1 top-4 w-40 rounded-[1.9rem] p-4 shadow-premium sm:-left-2 sm:top-6 sm:w-52 sm:p-5 lg:-left-16">
-            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-primary/72">PORTFOLIO OUTLOOK</p>
+            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-primary/72">
+              {getString(hero.statLabel, "PORTFOLIO OUTLOOK")}
+            </p>
             <div className="mt-4 flex items-end justify-between">
               <div>
-                <p className="font-display text-4xl tracking-[-0.06em] text-primary">+18.4%</p>
-                <p className="mt-2 text-xs text-muted">Long-Term Growth Strategy</p>
+                <p className="font-display text-4xl tracking-[-0.06em] text-primary">
+                  {getString(hero.statValue, "+18.4%")}
+                </p>
+                <p className="mt-2 text-xs text-muted">{getString(hero.statCaption, "Long-Term Growth Strategy")}</p>
               </div>
               <div className="h-16 w-16">
                 <LineGraph />
@@ -139,10 +143,12 @@ function HeroSection({ hero }: { hero: Record<string, unknown> }) {
             </div>
           </ScaleReveal>
 
-          <ScaleReveal className="absolute -bottom-6 right-0 w-[210px] rounded-[1.9rem] border border-white/10 bg-white/12 p-4 backdrop-blur-xl sm:-bottom-8 sm:right-3 sm:w-[250px] sm:p-5 lg:right-[-1.5rem]">
-            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-accent-soft">PERSONALIZED STRATEGY</p>
+          <ScaleReveal className="dark-panel absolute -bottom-6 right-0 w-[210px] rounded-[1.9rem] p-4 shadow-premium backdrop-blur-xl sm:-bottom-8 sm:right-3 sm:w-[250px] sm:p-5 lg:right-[-1.5rem]">
+            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-accent-soft">
+              {getString(hero.strategyLabel, "PERSONALIZED STRATEGY")}
+            </p>
             <p className="mt-3 font-display text-2xl tracking-[-0.04em] text-white">
-              Designed around your goals.
+              {getString(hero.strategyHeadline, "Designed around your goals.")}
             </p>
             <div className="mt-4 h-20">
               <LineGraph dark />
